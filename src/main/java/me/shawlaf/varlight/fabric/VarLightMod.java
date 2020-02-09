@@ -7,10 +7,12 @@ import net.minecraft.server.world.ServerLightingProvider;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.light.LightingProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,5 +87,18 @@ public class VarLightMod implements ModInitializer {
         }
 
         return true;
+    }
+
+    public File getVarLightSaveDirectory(ServerWorld world) {
+        File regionRoot = world.getDimension().getType().getSaveDirectory(world.getSaveHandler().getWorldDir());
+        File saveDir = new File(regionRoot, "varlight");
+
+        if (!saveDir.exists()) {
+            if (!saveDir.mkdirs()) {
+                throw new RuntimeException("Could not create VarLight directory \"" + saveDir.getAbsolutePath() + "\"");
+            }
+        }
+
+        return saveDir;
     }
 }

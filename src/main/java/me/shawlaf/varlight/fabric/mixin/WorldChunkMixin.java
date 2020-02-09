@@ -6,7 +6,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -22,7 +21,8 @@ public abstract class WorldChunkMixin implements Chunk {
     @Shadow
     private ChunkPos pos;
 
-    @Shadow public abstract BlockState getBlockState(BlockPos pos);
+    @Shadow
+    public abstract BlockState getBlockState(BlockPos pos);
 
     /**
      * @author Florian
