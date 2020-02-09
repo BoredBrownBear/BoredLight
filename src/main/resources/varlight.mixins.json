@@ -3,9 +3,13 @@
   "package": "me.shawlaf.varlight.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "WorldChunkMixin",
     "ServerWorldMixin"
   ],
+
+  "server": [
+    "WorldChunkMixin"
+  ],
+
   "injectors": {
     "defaultRequire": 1
   }

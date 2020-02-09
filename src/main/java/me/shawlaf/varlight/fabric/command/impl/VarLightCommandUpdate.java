@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.command.VarLightSubCommand;
+import me.shawlaf.varlight.fabric.persistence.PersistentLightSource;
 import me.shawlaf.varlight.fabric.util.OpPermissionLevel;
 import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.command.arguments.PosArgument;
@@ -41,10 +42,11 @@ public class VarLightCommandUpdate extends VarLightSubCommand {
         BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
         int lightLevel = context.getArgument("light level", int.class);
 
-        if (mod.createCustomLightSource(context.getSource().getWorld(), pos, lightLevel)) {
+        PersistentLightSource pls = mod.getManager(context.getSource().getWorld()).createPersistentLightSource(pos, lightLevel);
+
+        if (pls != null) {
+            mod.setLuminance(context.getSource().getWorld(), pos, pls.getEmittingLight());
             context.getSource().sendFeedback(new LiteralText("Updated Light level at Position [" + pos.toShortString() + "] to " + lightLevel), true);
-        } else {
-            context.getSource().sendFeedback(new LiteralText("Failed to update Light level at Position [" + pos.toShortString() + "]"), false);
         }
 
         return 1;

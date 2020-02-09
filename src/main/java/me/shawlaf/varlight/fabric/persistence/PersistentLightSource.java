@@ -1,6 +1,5 @@
 package me.shawlaf.varlight.fabric.persistence;
 
-import me.shawlaf.varlight.fabric.util.IntPositionExtension;
 import me.shawlaf.varlight.persistence.ICustomLightSource;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.Block;
@@ -70,7 +69,7 @@ public class PersistentLightSource implements ICustomLightSource {
     }
 
     public void migrate() {
-        throw new RuntimeException("Not yet Implemented"); // TODO
+        // TODO
     }
 
     public void update() {
@@ -80,11 +79,11 @@ public class PersistentLightSource implements ICustomLightSource {
     }
 
     public boolean isInvalid() {
-        throw new RuntimeException("Not yet Implemented"); // TODO
+        return false; // TODO
     }
 
     public String toCompactString(boolean colored) {
-        throw new RuntimeException("Not yet Implemented"); // TODO
+        return toString(); // TODO
     }
 
     @Override
@@ -96,5 +95,9 @@ public class PersistentLightSource implements ICustomLightSource {
                 ", world=" + world.getLevelProperties().getLevelName() +
                 ", emittingLight=" + emittingLight +
                 '}';
+    }
+
+    public int getEmittingLight() {
+        return getCustomLuminance(); // TODO
     }
 }

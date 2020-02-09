@@ -19,4 +19,8 @@ public class IntPositionExtension {
         return world.getBlockState(toBlockPos(position));
     }
 
+    public static IntPosition toIntPosition(BlockPos blockPos) {
+        return new IntPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
 }

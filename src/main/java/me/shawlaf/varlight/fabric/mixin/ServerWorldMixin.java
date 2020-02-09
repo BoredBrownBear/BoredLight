@@ -3,6 +3,8 @@ package me.shawlaf.varlight.fabric.mixin;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.ProgressListener;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
@@ -34,13 +36,30 @@ public abstract class ServerWorldMixin extends World {
         checkAndUpdateCustomLightSource(pos.west());
     }
 
+    @Inject(at = @At("HEAD"), method = "save(Lnet/minecraft/util/ProgressListener;ZZ)V")
+    public void onLevelSave(ProgressListener progressListener, boolean flush, boolean bl, CallbackInfo ci) {
+        if (bl) {
+            return;
+        }
+
+        if (progressListener != null) {
+            progressListener.method_15412(new LiteralText("Saving Custom Light sources"));
+        }
+
+        VarLightMod.INSTANCE.getManager(castThis()).save(null);
+    }
+
     private void checkAndUpdateCustomLightSource(BlockPos blockPos) {
-        int customLuminance = VarLightMod.INSTANCE.getCustomLuminance(blockPos);
+        int customLuminance = VarLightMod.INSTANCE.getManager(castThis()).getCustomLuminance(blockPos, 0);
 
         if (customLuminance == 0) {
             return;
         }
 
-        VarLightMod.INSTANCE.setCustomLuminance((ServerWorld) ((Object) this), blockPos, customLuminance);
+        VarLightMod.INSTANCE.setLuminance(castThis(), blockPos, customLuminance);
+    }
+
+    private ServerWorld castThis() {
+        return (ServerWorld) ((Object) this);
     }
 }
