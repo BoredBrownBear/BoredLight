@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "me.shawlaf.varlight.fabric.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "WorldChunkMixin",
+    "ServerWorldMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

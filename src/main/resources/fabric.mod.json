@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "varlight",
+  "version": "${version}",
+
+  "name": "VarLight",
+  "description": "Turn most blocks into Light sources!",
+  "authors": [
+    "shawlaf"
+  ],
+
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.shawlaf.varlight.fabric.VarLightMod"
+    ]
+  },
+
+  "mixins": [
+    "varlight.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.2",
+    "fabric": "*",
+    "minecraft": "1.15.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
