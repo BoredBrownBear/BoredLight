@@ -26,7 +26,8 @@ public abstract class WorldChunkMixin implements Chunk {
     @Shadow
     public abstract BlockState getBlockState(BlockPos pos);
 
-    @Shadow public abstract World getWorld();
+    @Shadow
+    public abstract World getWorld();
 
     /**
      * @author Florian
@@ -40,9 +41,15 @@ public abstract class WorldChunkMixin implements Chunk {
 
     @Override
     public int getLuminance(BlockPos pos) {
+        World world = getWorld();
         int vanilla = getBlockState(pos).getLuminance();
-        int custom = VarLightMod.INSTANCE.getManager((ServerWorld) getWorld()).getCustomLuminance(pos, 0);
 
-        return Math.max(vanilla, custom);
+        if (world instanceof ServerWorld) {
+            int custom = VarLightMod.INSTANCE.getManager((ServerWorld) world).getCustomLuminance(pos, 0);
+
+            return Math.max(vanilla, custom);
+        } else {
+            return vanilla;
+        }
     }
 }

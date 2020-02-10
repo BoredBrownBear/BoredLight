@@ -1,6 +1,9 @@
 package me.shawlaf.varlight.fabric.mixin;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
+import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
+import me.shawlaf.varlight.fabric.util.IntPositionExtension;
+import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
@@ -19,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.BiFunction;
 
+import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toIntPosition;
+
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World {
     protected ServerWorldMixin(LevelProperties levelProperties, DimensionType dimensionType, BiFunction<World, Dimension, ChunkManager> chunkManagerProvider, Profiler profiler, boolean isClient) {
@@ -27,13 +32,21 @@ public abstract class ServerWorldMixin extends World {
 
     @Inject(at = @At("INVOKE"), method = "onBlockChanged(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V")
     public void blockChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
-        checkAndUpdateCustomLightSource(pos);
-        checkAndUpdateCustomLightSource(pos.up());
-        checkAndUpdateCustomLightSource(pos.down());
-        checkAndUpdateCustomLightSource(pos.north());
-        checkAndUpdateCustomLightSource(pos.east());
-        checkAndUpdateCustomLightSource(pos.south());
-        checkAndUpdateCustomLightSource(pos.west());
+        IntPosition position = toIntPosition(pos);
+
+        WorldLightSourceManager manager = getManager();
+
+        if (manager.getCustomLuminance(position, 0) > 0) {
+            manager.createPersistentLightSource(pos, 0);
+            return;
+        }
+
+        checkAndUpdateCustomLightSource(manager, pos.up());
+        checkAndUpdateCustomLightSource(manager, pos.down());
+        checkAndUpdateCustomLightSource(manager, pos.north());
+        checkAndUpdateCustomLightSource(manager, pos.east());
+        checkAndUpdateCustomLightSource(manager, pos.south());
+        checkAndUpdateCustomLightSource(manager, pos.west());
     }
 
     @Inject(at = @At("HEAD"), method = "save(Lnet/minecraft/util/ProgressListener;ZZ)V")
@@ -46,11 +59,11 @@ public abstract class ServerWorldMixin extends World {
             progressListener.method_15412(new LiteralText("Saving Custom Light sources"));
         }
 
-        VarLightMod.INSTANCE.getManager(castThis()).save(null);
+        getManager().save(null);
     }
 
-    private void checkAndUpdateCustomLightSource(BlockPos blockPos) {
-        int customLuminance = VarLightMod.INSTANCE.getManager(castThis()).getCustomLuminance(blockPos, 0);
+    private void checkAndUpdateCustomLightSource(WorldLightSourceManager manager, BlockPos blockPos) {
+        int customLuminance = manager.getCustomLuminance(blockPos, 0);
 
         if (customLuminance == 0) {
             return;
@@ -61,5 +74,9 @@ public abstract class ServerWorldMixin extends World {
 
     private ServerWorld castThis() {
         return (ServerWorld) ((Object) this);
+    }
+
+    private WorldLightSourceManager getManager() {
+        return VarLightMod.INSTANCE.getManager(castThis());
     }
 }

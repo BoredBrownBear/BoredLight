@@ -2,11 +2,9 @@
   "required": true,
   "package": "me.shawlaf.varlight.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "ServerWorldMixin"
-  ],
 
-  "server": [
+  "mixins": [
+    "ServerWorldMixin",
     "WorldChunkMixin"
   ],
 
