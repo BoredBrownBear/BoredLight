@@ -13,7 +13,6 @@ import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerLightingProvider;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -99,7 +98,7 @@ public class VarLightMod implements ModInitializer {
             updateLight(world, blockPos);
         }
 
-        return LightUpdateResult.SUCCESS;
+        return LightUpdateResult.success(lightLevel);
     }
 
     private void setLightRaw(ServerWorld world, BlockPos blockPos, int lightLevel) {
@@ -213,14 +212,12 @@ public class VarLightMod implements ModInitializer {
         LightUpdateResult result = setLuminance(player, world, blockPos, toLight);
 
         if (result.isSuccess()) {
-            player.addChatMessage(new LiteralText("Updated Light level"), true);
-
             if (player.interactionManager.isSurvivalLike() && mod > 0) {
                 stack.decrement(1);
             }
-        } else {
-            player.addChatMessage(new LiteralText(result.name()), true);
         }
+
+        result.sendActionBarMessage(player);
 
         return ActionResult.SUCCESS;
     }

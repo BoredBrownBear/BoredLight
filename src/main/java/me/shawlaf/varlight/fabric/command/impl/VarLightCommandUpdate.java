@@ -13,6 +13,7 @@ import net.minecraft.command.arguments.PosArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -48,7 +49,7 @@ public class VarLightCommandUpdate extends VarLightSubCommand {
         if (lightUpdateResult.isSuccess()) {
             context.getSource().sendFeedback(new LiteralText("Updated Light level at Position [" + pos.toShortString() + "] to " + lightLevel), true);
         } else {
-            context.getSource().sendError(new LiteralText(lightUpdateResult.name()));
+            context.getSource().sendError(lightUpdateResult.getMessage());
         }
 
         return 1;
