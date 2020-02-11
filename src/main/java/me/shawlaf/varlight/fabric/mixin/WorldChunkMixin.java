@@ -47,7 +47,7 @@ public abstract class WorldChunkMixin implements Chunk {
         if (world instanceof ServerWorld) {
             int custom = VarLightMod.INSTANCE.getManager((ServerWorld) world).getCustomLuminance(pos, 0);
 
-            return Math.max(vanilla, custom);
+            return custom != 0 ? custom : vanilla;
         } else {
             return vanilla;
         }

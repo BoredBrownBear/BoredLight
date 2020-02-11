@@ -59,6 +59,10 @@ public class WorldLightSourceManager {
         return world;
     }
 
+    public void deleteLightSource(BlockPos blockPos) {
+        createPersistentLightSource(blockPos, 0);
+    }
+
     public PersistentLightSource createPersistentLightSource(BlockPos blockPos, int emittingLight) {
         return createPersistentLightSource(toIntPosition(blockPos), emittingLight);
     }

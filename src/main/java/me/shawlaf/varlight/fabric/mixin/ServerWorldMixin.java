@@ -2,7 +2,6 @@ package me.shawlaf.varlight.fabric.mixin;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
-import me.shawlaf.varlight.fabric.util.IntPositionExtension;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
@@ -37,7 +36,7 @@ public abstract class ServerWorldMixin extends World {
         WorldLightSourceManager manager = getManager();
 
         if (manager.getCustomLuminance(position, 0) > 0) {
-            manager.createPersistentLightSource(pos, 0);
+            manager.deleteLightSource(pos);
             return;
         }
 
@@ -62,6 +61,11 @@ public abstract class ServerWorldMixin extends World {
         getManager().save(null);
     }
 
+    @Override
+    public int getLuminance(BlockPos pos) {
+        return getChunk(pos).getLuminance(pos);
+    }
+
     private void checkAndUpdateCustomLightSource(WorldLightSourceManager manager, BlockPos blockPos) {
         int customLuminance = manager.getCustomLuminance(blockPos, 0);
 
@@ -69,7 +73,7 @@ public abstract class ServerWorldMixin extends World {
             return;
         }
 
-        VarLightMod.INSTANCE.setLuminance(castThis(), blockPos, customLuminance);
+        VarLightMod.INSTANCE.updateLight(castThis(), blockPos);
     }
 
     private ServerWorld castThis() {

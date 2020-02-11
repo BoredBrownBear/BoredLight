@@ -4,12 +4,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.shawlaf.varlight.fabric.LightUpdateResult;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.command.VarLightSubCommand;
-import me.shawlaf.varlight.fabric.persistence.PersistentLightSource;
 import me.shawlaf.varlight.fabric.util.OpPermissionLevel;
 import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.command.arguments.PosArgument;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
@@ -42,11 +43,12 @@ public class VarLightCommandUpdate extends VarLightSubCommand {
         BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
         int lightLevel = context.getArgument("light level", int.class);
 
-        PersistentLightSource pls = mod.getManager(context.getSource().getWorld()).createPersistentLightSource(pos, lightLevel);
+        LightUpdateResult lightUpdateResult = mod.setLuminance((context.getSource().getEntity() instanceof PlayerEntity ? context.getSource().getPlayer() : null), context.getSource().getWorld(), pos, lightLevel);
 
-        if (pls != null) {
-            mod.setLuminance(context.getSource().getWorld(), pos, pls.getEmittingLight());
+        if (lightUpdateResult.isSuccess()) {
             context.getSource().sendFeedback(new LiteralText("Updated Light level at Position [" + pos.toShortString() + "] to " + lightLevel), true);
+        } else {
+            context.getSource().sendError(new LiteralText(lightUpdateResult.name()));
         }
 
         return 1;

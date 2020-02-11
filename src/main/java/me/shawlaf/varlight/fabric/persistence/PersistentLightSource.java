@@ -1,14 +1,17 @@
 package me.shawlaf.varlight.fabric.persistence;
 
+import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.persistence.ICustomLightSource;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.Block;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Objects;
 
 import static me.shawlaf.varlight.fabric.util.IntPositionExtension.getBlockState;
+import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toBlockPos;
 
 public class PersistentLightSource implements ICustomLightSource {
 
@@ -68,13 +71,16 @@ public class PersistentLightSource implements ICustomLightSource {
         return !migrated;
     }
 
-    public void migrate() {
-        // TODO
-    }
-
     public void update() {
         if (needsMigration() && world.isChunkLoaded(position.getChunkX(), position.getChunkZ())) {
-            migrate();
+            BlockPos blockPos = toBlockPos(position);
+
+            if (!world.isChunkLoaded(blockPos.getX() >> 4, blockPos.getZ() >> 4)) {
+                return;
+            }
+
+            VarLightMod.INSTANCE.setLuminance(null, world, blockPos, emittingLight);
+            migrated = true;
         }
     }
 
