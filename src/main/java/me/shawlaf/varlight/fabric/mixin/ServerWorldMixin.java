@@ -35,7 +35,7 @@ public abstract class ServerWorldMixin extends World {
 
         WorldLightSourceManager manager = getManager();
 
-        if (manager.getCustomLuminance(position, 0) > 0) {
+        if (manager.getCustomLuminance(position, 0) > 0 && oldBlock != newBlock) {
             manager.deleteLightSource(pos);
             return;
         }

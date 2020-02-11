@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerLightingProvider;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
@@ -18,7 +19,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.light.ChunkBlockLightProvider;
 import net.minecraft.world.chunk.light.LightingProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,19 +51,19 @@ public class VarLightMod implements ModInitializer {
         this.command.register();
 
         UseBlockCallback.EVENT.register((playerEntity, world, hand, blockHitResult) -> {
-            if (!(world instanceof ServerWorld)) {
+            if (!(world instanceof ServerWorld) || !(playerEntity instanceof ServerPlayerEntity)) {
                 return ActionResult.PASS;
             }
 
-            return useBlock(playerEntity, (ServerWorld) world, hand, blockHitResult);
+            return useBlock(((ServerPlayerEntity) playerEntity), (ServerWorld) world, hand, blockHitResult);
         });
 
         AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> {
-            if (!(world instanceof ServerWorld)) {
+            if (!(world instanceof ServerWorld) || !(playerEntity instanceof ServerPlayerEntity)) {
                 return ActionResult.PASS;
             }
 
-            return attackBlock(playerEntity, (ServerWorld) world, hand, blockPos);
+            return attackBlock(((ServerPlayerEntity) playerEntity), (ServerWorld) world, hand, blockPos);
         });
     }
 
@@ -89,14 +92,18 @@ public class VarLightMod implements ModInitializer {
 
         manager.deleteLightSource(blockPos);
 
-        updateLight(world, blockPos).thenRun(() -> {
-            if (lightLevel > 0) {
-                manager.createPersistentLightSource(blockPos, lightLevel);
-                updateLight(world, blockPos);
-            }
-        });
+        ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).checkBlock(blockPos);
+
+        if (lightLevel > 0) {
+            manager.createPersistentLightSource(blockPos, lightLevel);
+            updateLight(world, blockPos);
+        }
 
         return LightUpdateResult.SUCCESS;
+    }
+
+    private void setLightRaw(ServerWorld world, BlockPos blockPos, int lightLevel) {
+        ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).addLightSource(blockPos, lightLevel);
     }
 
     public CompletableFuture<Void> updateLight(ServerWorld world, BlockPos blockPos) {
@@ -169,15 +176,15 @@ public class VarLightMod implements ModInitializer {
         return world.getLevelProperties().getLevelName() + "/" + world.getDimension().getType().toString();
     }
 
-    private ActionResult useBlock(PlayerEntity player, ServerWorld world, Hand hand, BlockHitResult hitResult) {
+    private ActionResult useBlock(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockHitResult hitResult) {
         return modLight(player, world, hand, hitResult.getBlockPos(), 1);
     }
 
-    private ActionResult attackBlock(PlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos) {
+    private ActionResult attackBlock(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos) {
         return modLight(player, world, hand, blockPos, -1);
     }
 
-    private ActionResult modLight(PlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos, int mod) {
+    private ActionResult modLight(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos, int mod) {
         ItemStack stack;
 
         switch (hand) {
@@ -207,6 +214,10 @@ public class VarLightMod implements ModInitializer {
 
         if (result.isSuccess()) {
             player.addChatMessage(new LiteralText("Updated Light level"), true);
+
+            if (player.interactionManager.isSurvivalLike() && mod > 0) {
+                stack.decrement(1);
+            }
         } else {
             player.addChatMessage(new LiteralText(result.name()), true);
         }
