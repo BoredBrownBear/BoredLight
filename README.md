@@ -12,5 +12,5 @@ Fabric Version of [VarLight](https://github.com/flori-schwa/VarLight)
 - [X] Glowstone dust increment/decrement
   - [X] Fix Light level not updating after decrement
 - [ ] Silk touch and Fortune
-  - [ ] `/varlight give` command
+  - [X] `/varlight give` command
 - [ ] `/varlight debug` command

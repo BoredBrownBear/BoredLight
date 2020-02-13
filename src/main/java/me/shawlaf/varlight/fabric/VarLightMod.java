@@ -5,8 +5,10 @@ import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket;
@@ -18,6 +20,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.light.ChunkBlockLightProvider;
@@ -33,6 +36,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class VarLightMod implements ModInitializer {
+
+    public static final String KEY_GLOWING = "varlight:glowing";
 
     public static VarLightMod INSTANCE;
 
@@ -54,6 +59,10 @@ public class VarLightMod implements ModInitializer {
                 return ActionResult.PASS;
             }
 
+            if (((ServerPlayerEntity) playerEntity).interactionManager.getGameMode() == GameMode.SPECTATOR) {
+                return ActionResult.PASS;
+            }
+
             return useBlock(((ServerPlayerEntity) playerEntity), (ServerWorld) world, hand, blockHitResult);
         });
 
@@ -62,8 +71,13 @@ public class VarLightMod implements ModInitializer {
                 return ActionResult.PASS;
             }
 
+            if (((ServerPlayerEntity) playerEntity).interactionManager.getGameMode() == GameMode.SPECTATOR) {
+                return ActionResult.PASS;
+            }
+
             return attackBlock(((ServerPlayerEntity) playerEntity), (ServerWorld) world, hand, blockPos);
         });
+
     }
 
     public Logger getLogger() {
@@ -156,6 +170,25 @@ public class VarLightMod implements ModInitializer {
         return !blockState.isOpaque();
     }
 
+    public void onBlockPlaced(ServerPlayerEntity player, ItemStack stack, BlockPos blockPos) {
+        if (!stack.hasTag()) {
+            return;
+        }
+
+        //noinspection ConstantConditions not-Null Check already performed by ItemStack#hasTag
+        if (!stack.getTag().contains(KEY_GLOWING)) {
+            return;
+        }
+
+        if (!(stack.getItem() instanceof BlockItem)) {
+            return;
+        }
+
+        int ll = stack.getTag().getInt(KEY_GLOWING);
+
+        setLuminance(player, (ServerWorld) player.world, blockPos, ll).sendActionBarMessage(player);
+    }
+
     private List<ChunkPos> collectLightUpdateChunks(BlockPos center) {
         List<ChunkPos> list = new ArrayList<>();
 
@@ -175,33 +208,31 @@ public class VarLightMod implements ModInitializer {
         return world.getLevelProperties().getLevelName() + "/" + world.getDimension().getType().toString();
     }
 
-    private ActionResult useBlock(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockHitResult hitResult) {
-        return modLight(player, world, hand, hitResult.getBlockPos(), 1);
-    }
-
-    private ActionResult attackBlock(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos) {
-        return modLight(player, world, hand, blockPos, -1);
-    }
-
-    private ActionResult modLight(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos, int mod) {
-        ItemStack stack;
-
+    private ItemStack getStack(ServerPlayerEntity player, Hand hand) {
         switch (hand) {
             case MAIN_HAND: {
-                stack = player.inventory.getMainHandStack();
-                break;
+                return player.inventory.getMainHandStack();
             }
 
             case OFF_HAND: {
-                stack = player.inventory.offHand.get(0);
-                break;
+                return  player.inventory.offHand.get(0);
             }
 
             default: {
                 throw new IllegalStateException("More than 2 Hands???");
             }
         }
+    }
 
+    private ActionResult useBlock(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockHitResult hitResult) {
+        return modLight(player, getStack(player, hand), world, hitResult.getBlockPos(), 1);
+    }
+
+    private ActionResult attackBlock(ServerPlayerEntity player, ServerWorld world, Hand hand, BlockPos blockPos) {
+        return modLight(player, getStack(player, hand), world, blockPos, -1);
+    }
+
+    private ActionResult modLight(ServerPlayerEntity player, ItemStack stack, ServerWorld world, BlockPos blockPos, int mod) {
         if (stack == ItemStack.EMPTY || stack.getItem() != Items.GLOWSTONE_DUST) {
             return ActionResult.PASS;
         }
