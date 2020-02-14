@@ -5,18 +5,25 @@ import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerLightingProvider;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Language;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -29,15 +36,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class VarLightMod implements ModInitializer {
 
     public static final String KEY_GLOWING = "varlight:glowing";
+    public static final String COLOR_SYMBOL = "\u00a7";
 
     public static VarLightMod INSTANCE;
 
@@ -189,6 +194,25 @@ public class VarLightMod implements ModInitializer {
         setLuminance(player, (ServerWorld) player.world, blockPos, ll).sendActionBarMessage(player);
     }
 
+    public ItemStack makeGlowing(ItemStack base, int lightLevel) {
+        base.getOrCreateTag().put(VarLightMod.KEY_GLOWING, IntTag.of(lightLevel));
+
+        CompoundTag displayTag = base.getOrCreateSubTag("display");
+
+        displayTag.putString("Name", Text.Serializer.toJson(getDisplayText(base.getItem())));
+        ListTag loreTag = new ListTag();
+
+        List<Text> lore = getLore(lightLevel);
+
+        for (Text text : lore) {
+            loreTag.add(StringTag.of(Text.Serializer.toJson(text)));
+        }
+
+        displayTag.put("Lore", loreTag);
+
+        return base;
+    }
+
     private List<ChunkPos> collectLightUpdateChunks(BlockPos center) {
         List<ChunkPos> list = new ArrayList<>();
 
@@ -215,7 +239,7 @@ public class VarLightMod implements ModInitializer {
             }
 
             case OFF_HAND: {
-                return  player.inventory.offHand.get(0);
+                return player.inventory.offHand.get(0);
             }
 
             default: {
@@ -251,5 +275,13 @@ public class VarLightMod implements ModInitializer {
         result.sendActionBarMessage(player);
 
         return ActionResult.SUCCESS;
+    }
+
+    private Text getDisplayText(Item item) {
+        return new LiteralText(COLOR_SYMBOL + "r" + COLOR_SYMBOL + "6Glowing " + Language.getInstance().translate(item.getTranslationKey()));
+    }
+
+    private List<Text> getLore(int lightLevel) {
+        return Collections.singletonList(new LiteralText(COLOR_SYMBOL + "rEmitting Light: " + lightLevel));
     }
 }

@@ -6,7 +6,9 @@
   "mixins": [
     "ServerWorldMixin",
     "WorldChunkMixin",
-    "ServerPlayerInteractionManagerMixin"
+    "ServerPlayerInteractionManagerMixin",
+    "BlockMixin",
+    "BlockItemMixin"
   ],
 
   "injectors": {

@@ -1,7 +1,6 @@
 package me.shawlaf.varlight.fabric.persistence;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
-import me.shawlaf.varlight.fabric.util.IntPositionExtension;
 import me.shawlaf.varlight.fabric.util.OpPermissionLevel;
 import me.shawlaf.varlight.persistence.LightPersistFailedException;
 import me.shawlaf.varlight.persistence.RegionPersistor;
@@ -19,7 +18,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import java.io.IOException;
-import java.security.spec.RSAOtherPrimeInfo;
 import java.util.*;
 import java.util.function.IntSupplier;
 

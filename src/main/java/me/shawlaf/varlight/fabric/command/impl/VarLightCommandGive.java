@@ -12,23 +12,14 @@ import net.minecraft.command.arguments.ItemStackArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Language;
 import net.minecraft.util.registry.Registry;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -37,7 +28,6 @@ import static net.minecraft.command.arguments.ItemStackArgumentType.itemStack;
 
 public class VarLightCommandGive extends VarLightSubCommand {
 
-    public static final String COLOR_SYMBOL = "\u00a7";
 
     public VarLightCommandGive(VarLightMod mod) {
         super(mod, "give");
@@ -67,14 +57,6 @@ public class VarLightCommandGive extends VarLightSubCommand {
         return root;
     }
 
-    private Text getDisplayText(Item item) {
-        return new LiteralText(COLOR_SYMBOL + "r" + COLOR_SYMBOL + "6Glowing " + Language.getInstance().translate(item.getTranslationKey()));
-    }
-
-    private List<Text> getLore(int lightLevel) {
-        return Collections.singletonList(new LiteralText(COLOR_SYMBOL + "rEmitting Light: " + lightLevel));
-    }
-
     private int execute(CommandContext<ServerCommandSource> context, final int amount) throws CommandSyntaxException {
         ItemStackArgument stack = context.getArgument("item", ItemStackArgument.class);
 
@@ -84,10 +66,6 @@ public class VarLightCommandGive extends VarLightSubCommand {
         }
 
         int lightLevel = context.getArgument("lightlevel", int.class);
-        IntTag llTag = IntTag.of(lightLevel);
-
-        Text display = getDisplayText(stack.getItem());
-        List<Text> lore = getLore(lightLevel);
 
         List<? extends Entity> targets = context.getArgument("targets", EntitySelector.class).getEntities(context.getSource());
 
@@ -100,20 +78,7 @@ public class VarLightCommandGive extends VarLightSubCommand {
                 int toGive = Math.min((amount - given), stack.getItem().getMaxCount());
                 given += toGive;
 
-                ItemStack itemStack = stack.createStack(toGive, false);
-
-                itemStack.getOrCreateTag().put(VarLightMod.KEY_GLOWING, llTag);
-
-                CompoundTag displayTag = itemStack.getOrCreateSubTag("display");
-
-                displayTag.putString("Name", Text.Serializer.toJson(display));
-                ListTag loreTag = new ListTag();
-
-                for (Text text : lore) {
-                    loreTag.add(StringTag.of(Text.Serializer.toJson(text)));
-                }
-
-                displayTag.put("Lore", loreTag);
+                ItemStack itemStack = mod.makeGlowing(stack.createStack(toGive, false), lightLevel);
 
                 boolean bl = spe.inventory.insertStack(itemStack);
 
