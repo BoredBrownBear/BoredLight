@@ -31,7 +31,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
     /**
      * @author Florian
      * <p>
-     * This is just the vanilly tryBreakBlock Code with some VarLight checks and logic patched in
+     * This is just the vanilla tryBreakBlock Code with some VarLight checks and logic patched in
      */
     @Overwrite
     public boolean tryBreakBlock(BlockPos blockPos) {
