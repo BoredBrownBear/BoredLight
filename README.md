@@ -13,5 +13,5 @@ Fabric Version of [VarLight](https://github.com/flori-schwa/VarLight)
   - [X] Fix Light level not updating after decrement
 - [X] Silk touch and Fortune
   - [X] `/varlight give` command
-- [ ] `/varlight debug` command
+- [X] `/varlight debug` command
 - [ ] `/varlight fill` command
