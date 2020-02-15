@@ -14,4 +14,4 @@ Fabric Version of [VarLight](https://github.com/flori-schwa/VarLight)
 - [X] Silk touch and Fortune
   - [X] `/varlight give` command
 - [X] `/varlight debug` command
-- [ ] `/varlight fill` command
+- [X] `/varlight fill` command
