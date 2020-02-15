@@ -63,7 +63,7 @@ public class VarLightCommandDebug extends VarLightSubCommand {
 
         root.requires(scs -> scs.hasPermissionLevel(OpPermissionLevel.MANAGE_GAME));
 
-        root.then(LiteralArgumentBuilder.<ServerCommandSource>literal("stick").executes(this::executeStick));
+//        root.then(LiteralArgumentBuilder.<ServerCommandSource>literal("stick").executes(this::executeStick));
 
         root.then(
                 LiteralArgumentBuilder.<ServerCommandSource>literal("list")
