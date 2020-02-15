@@ -195,7 +195,7 @@ public class VarLightCommandDebug extends VarLightSubCommand {
         List<PersistentLightSource> pageList = VarLightCommand.paginateEntries(lightSources, PAGE_SIZE, page);
         int pages = VarLightCommand.getAmountPages(lightSources, PAGE_SIZE);
 
-        source.sendFeedback(new LiteralText(String.format("Amount of Light sources in Chunk [%d, %d]: %d (Showing Page %d / %d)", chunkX, chunkZ, lightSources.size(), Math.min(page, pages), page)), false);
+        source.sendFeedback(new LiteralText(String.format("Amount of Light sources in Chunk [%d, %d]: %d (Showing Page %d / %d)", chunkX, chunkZ, lightSources.size(), Math.min(page, pages), pages)), false);
 
         return listLightSources(source, pageList);
     }

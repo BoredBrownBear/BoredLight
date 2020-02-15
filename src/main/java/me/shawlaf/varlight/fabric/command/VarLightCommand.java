@@ -3,6 +3,7 @@ package me.shawlaf.varlight.fabric.command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.command.impl.VarLightCommandDebug;
+import me.shawlaf.varlight.fabric.command.impl.VarLightCommandFill;
 import me.shawlaf.varlight.fabric.command.impl.VarLightCommandGive;
 import me.shawlaf.varlight.fabric.command.impl.VarLightCommandUpdate;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
@@ -17,7 +18,8 @@ public class VarLightCommand {
     private static final Class[] COMMANDS = {
             VarLightCommandUpdate.class,
             VarLightCommandGive.class,
-            VarLightCommandDebug.class
+            VarLightCommandDebug.class,
+            VarLightCommandFill.class
     };
 
     private final VarLightMod mod;
