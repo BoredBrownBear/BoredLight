@@ -2,10 +2,7 @@ package me.shawlaf.varlight.fabric.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.shawlaf.varlight.fabric.VarLightMod;
-import me.shawlaf.varlight.fabric.command.impl.VarLightCommandDebug;
-import me.shawlaf.varlight.fabric.command.impl.VarLightCommandFill;
-import me.shawlaf.varlight.fabric.command.impl.VarLightCommandGive;
-import me.shawlaf.varlight.fabric.command.impl.VarLightCommandUpdate;
+import me.shawlaf.varlight.fabric.command.impl.*;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -19,7 +16,8 @@ public class VarLightCommand {
             VarLightCommandUpdate.class,
             VarLightCommandGive.class,
             VarLightCommandDebug.class,
-            VarLightCommandFill.class
+            VarLightCommandFill.class,
+            VarLightCommandMigrate.class
     };
 
     private final VarLightMod mod;
@@ -46,7 +44,7 @@ public class VarLightCommand {
     }
 
     public static int getAmountPages(List<?> all, int pageSize) {
-        return (all.size() / pageSize) + 1;
+        return (all.size() / pageSize) + (all.size() % pageSize > 0 ? 1 : 0);
     }
 
     public static <T> List<T> paginateEntries(List<T> all, int pageSize, int page) {

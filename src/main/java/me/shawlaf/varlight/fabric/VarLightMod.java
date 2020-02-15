@@ -228,7 +228,7 @@ public class VarLightMod implements ModInitializer {
         return list;
     }
 
-    private String getKey(ServerWorld world) {
+    public String getKey(ServerWorld world) {
         return world.getLevelProperties().getLevelName() + "/" + world.getDimension().getType().toString();
     }
 

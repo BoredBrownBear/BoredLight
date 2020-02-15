@@ -71,17 +71,22 @@ public class PersistentLightSource implements ICustomLightSource {
         return !migrated;
     }
 
-    public void update() {
+    public boolean migrate() {
         if (needsMigration() && world.isChunkLoaded(position.getChunkX(), position.getChunkZ())) {
             BlockPos blockPos = toBlockPos(position);
 
             if (!world.isChunkLoaded(blockPos.getX() >> 4, blockPos.getZ() >> 4)) {
-                return;
+                return false;
             }
 
-            VarLightMod.INSTANCE.setLuminance(null, world, blockPos, emittingLight);
-            migrated = true;
+            boolean success = VarLightMod.INSTANCE.setLuminance(null, world, blockPos, emittingLight).isSuccess();
+
+            migrated = success;
+
+            return success;
         }
+
+        return false;
     }
 
     public boolean isInvalid() {

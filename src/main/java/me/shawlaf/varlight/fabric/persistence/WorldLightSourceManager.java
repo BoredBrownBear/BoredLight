@@ -5,6 +5,7 @@ import me.shawlaf.varlight.fabric.util.OpPermissionLevel;
 import me.shawlaf.varlight.persistence.LightPersistFailedException;
 import me.shawlaf.varlight.persistence.RegionPersistor;
 import me.shawlaf.varlight.util.ChunkCoords;
+import me.shawlaf.varlight.util.FileUtil;
 import me.shawlaf.varlight.util.IntPosition;
 import me.shawlaf.varlight.util.RegionCoords;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,9 +18,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toIntPosition;
 
@@ -154,6 +158,31 @@ public class WorldLightSourceManager {
             }
 
             return worldMap.get(regionCoords);
+        }
+    }
+
+    public List<PersistentLightSource> getAllLightSources() {
+        File saveDir = mod.getVarLightSaveDirectory(this.world);
+        File[] files = saveDir.listFiles();
+
+        if (files == null) {
+            throw new LightPersistFailedException("Failed to list Files in " + saveDir.getAbsolutePath());
+        }
+
+        for (File regionFile : files) {
+            getRegionPersistor(FileUtil.parseRegionCoordsFromFileName(regionFile.getName()));
+        }
+
+        synchronized (worldMap) {
+            return worldMap.values().stream().flatMap(persistor -> {
+                try {
+                    return persistor.loadAll().stream();
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                    return Stream.empty();
+                }
+            }).collect(Collectors.toList());
         }
     }
 
