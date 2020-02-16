@@ -32,10 +32,6 @@
     "minecraft": "1.15.x"
   },
 
-  "breaks": {
-    "carpet": "*"
-  },
-
   "suggests": {
     "flamingo": "*"
   }

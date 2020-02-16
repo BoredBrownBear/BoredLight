@@ -16,8 +16,11 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
@@ -94,11 +97,13 @@ public class VarLightCommandFill extends VarLightSubCommand {
 
         int succeeded = 0, skipped = 0, failed = 0;
 
+        Set<ChunkPos> toUpdate = new HashSet<>();
+
         while (iterator.hasNext()) {
             cbp = new CachedBlockPosition(context.getSource().getWorld(), iterator.next(), false);
 
             if (predicate.test(cbp)) {
-                if (mod.setLuminance(player, context.getSource().getWorld(), cbp.getBlockPos(), lightLevel).isSuccess()) {
+                if (mod.setLuminance(player, context.getSource().getWorld(), cbp.getBlockPos(), lightLevel, false).isSuccess()) {
                     ++succeeded;
                 } else {
                     ++failed;
@@ -106,6 +111,12 @@ public class VarLightCommandFill extends VarLightSubCommand {
             } else {
                 ++skipped;
             }
+
+            toUpdate.addAll(mod.collectLightUpdateChunks(cbp.getBlockPos()));
+        }
+
+        for (ChunkPos chunkPos : toUpdate) {
+            mod.updateLight(context.getSource().getWorld(), chunkPos);
         }
 
         context.getSource().sendFeedback(

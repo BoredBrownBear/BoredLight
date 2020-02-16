@@ -13,11 +13,11 @@ import java.util.List;
 public class VarLightCommand {
 
     private static final Class[] COMMANDS = {
-            VarLightCommandUpdate.class,
-            VarLightCommandGive.class,
             VarLightCommandDebug.class,
             VarLightCommandFill.class,
-            VarLightCommandMigrate.class
+            VarLightCommandGive.class,
+            VarLightCommandMigrate.class,
+            VarLightCommandUpdate.class,
     };
 
     private final VarLightMod mod;

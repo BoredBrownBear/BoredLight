@@ -2,15 +2,12 @@
   "required": true,
   "package": "me.shawlaf.varlight.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
-
   "mixins": [
     "ServerWorldMixin",
     "WorldChunkMixin",
-    "ServerPlayerInteractionManagerMixin",
     "BlockMixin",
-    "BlockItemMixin"
+    "ServerChunkManagerMixin"
   ],
-
   "injectors": {
     "defaultRequire": 1
   }

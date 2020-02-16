@@ -37,9 +37,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class VarLightMod implements ModInitializer {
+
+    public static final ConcurrentLinkedQueue<Runnable> TASKS = new ConcurrentLinkedQueue<>();
 
     public static final String KEY_GLOWING = "varlight:glowing";
     public static final String COLOR_SYMBOL = "\u00a7";
@@ -90,6 +92,10 @@ public class VarLightMod implements ModInitializer {
     }
 
     public LightUpdateResult setLuminance(PlayerEntity modifier, ServerWorld world, BlockPos blockPos, int lightLevel) {
+        return setLuminance(modifier, world, blockPos, lightLevel, true);
+    }
+
+    public LightUpdateResult setLuminance(PlayerEntity modifier, ServerWorld world, BlockPos blockPos, int lightLevel, boolean update) {
         if (modifier != null && !world.canPlayerModifyAt(modifier, blockPos)) {
             return LightUpdateResult.CANNOT_MODIFY;
         }
@@ -108,12 +114,17 @@ public class VarLightMod implements ModInitializer {
 
         WorldLightSourceManager manager = getManager(world);
 
-        manager.deleteLightSource(blockPos);
+        if (update) {
+            manager.deleteLightSource(blockPos);
 
-        ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).checkBlock(blockPos);
+            ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).checkBlock(blockPos);
+        }
 
         if (lightLevel > 0) {
             manager.createPersistentLightSource(blockPos, lightLevel);
+        }
+
+        if (update) {
             updateLight(world, blockPos);
         }
 
@@ -124,17 +135,23 @@ public class VarLightMod implements ModInitializer {
         ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).addLightSource(blockPos, lightLevel);
     }
 
-    public CompletableFuture<Void> updateLight(ServerWorld world, BlockPos blockPos) {
+    public void updateLight(ServerWorld world, BlockPos blockPos) {
+        updateLight(world, new ChunkPos(blockPos));
+    }
+
+    public void updateLight(ServerWorld world, ChunkPos chunkPos) {
         LightingProvider provider = world.getLightingProvider();
 
-        return ((ServerLightingProvider) provider).light(world.getChunk(blockPos), false).thenRun(() -> {
-            for (ChunkPos pos : collectLightUpdateChunks(blockPos)) {
-                LightUpdateS2CPacket packet = new LightUpdateS2CPacket(pos, provider);
+        ((ServerLightingProvider) provider).light(world.getChunk(chunkPos.x, chunkPos.z), false).thenRun(() -> {
+            TASKS.add(() -> {
+                for (ChunkPos pos : collectLightUpdateChunks(chunkPos)) {
+                    LightUpdateS2CPacket packet = new LightUpdateS2CPacket(pos, provider);
 
-                world.getChunkManager().threadedAnvilChunkStorage.getPlayersWatchingChunk(pos, false).forEach(spe -> {
-                    spe.networkHandler.sendPacket(packet);
-                });
-            }
+                    world.getChunkManager().threadedAnvilChunkStorage.getPlayersWatchingChunk(pos, false).forEach(spe -> {
+                        spe.networkHandler.sendPacket(packet);
+                    });
+                }
+            });
         });
     }
 
@@ -213,11 +230,15 @@ public class VarLightMod implements ModInitializer {
         return base;
     }
 
-    private List<ChunkPos> collectLightUpdateChunks(BlockPos center) {
+    public List<ChunkPos> collectLightUpdateChunks(BlockPos center) {
+        return collectLightUpdateChunks(new ChunkPos(center));
+    }
+
+    public List<ChunkPos> collectLightUpdateChunks(ChunkPos center) {
         List<ChunkPos> list = new ArrayList<>();
 
-        int centerChunkX = center.getX() >> 4;
-        int centerChunkZ = center.getZ() >> 4;
+        int centerChunkX = center.x;
+        int centerChunkZ = center.z;
 
         for (int cz = centerChunkZ - 1; cz <= centerChunkZ + 1; cz++) {
             for (int cx = centerChunkX - 1; cx <= centerChunkX + 1; cx++) {
