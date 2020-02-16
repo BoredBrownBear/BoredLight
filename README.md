@@ -6,8 +6,8 @@ Fabric Version of [VarLight](https://github.com/flori-schwa/VarLight)
 
 VarLight Allows you to create custom Light sources by right clicking blocks with glowstone dust.
 
--   Right click blocks with glowstone dust to increment Light Level by 1
--   Left click blocks with glowstone dust to decrement Light level by 1
+-   Right click blocks with glowstone dust to increase Light Level by 1
+-   Left click blocks with glowstone dust to decrease Light level by 1
 -   Breaking Custom Light sources with a Silk touch tool will drop a glowing version of the block
 
 Supported MC Versions:
