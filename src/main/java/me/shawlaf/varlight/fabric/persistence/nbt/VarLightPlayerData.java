@@ -5,19 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 public class VarLightPlayerData implements INbtSerializable {
-
-    private static final Map<UUID, VarLightPlayerData> PLAYER_DATA = Collections.synchronizedMap(new HashMap<>());
-
-    @Deprecated
-    public static void clear() {
-        PLAYER_DATA.clear();
-    }
 
     private byte stepSize = 1;
     private final ServerPlayerEntity player;
