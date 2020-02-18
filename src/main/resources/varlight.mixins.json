@@ -8,7 +8,8 @@
     "BlockMixin",
     "ServerChunkManagerMixin",
     "ServerPlayerEntityMixin",
-    "MinecraftServerMixin"
+    "MinecraftServerMixin",
+    "WorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1

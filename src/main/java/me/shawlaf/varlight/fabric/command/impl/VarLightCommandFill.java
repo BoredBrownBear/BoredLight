@@ -103,7 +103,7 @@ public class VarLightCommandFill extends VarLightSubCommand {
             cbp = new CachedBlockPosition(context.getSource().getWorld(), iterator.next(), false);
 
             if (predicate.test(cbp)) {
-                if (mod.setLuminance(player, context.getSource().getWorld(), cbp.getBlockPos(), lightLevel, false).isSuccess()) {
+                if (mod.getLightModifier().setLuminance(player, context.getSource().getWorld(), cbp.getBlockPos(), lightLevel, false).isSuccess()) {
                     ++succeeded;
                 } else {
                     ++failed;
@@ -112,11 +112,11 @@ public class VarLightCommandFill extends VarLightSubCommand {
                 ++skipped;
             }
 
-            toUpdate.addAll(mod.collectLightUpdateChunks(cbp.getBlockPos()));
+            toUpdate.addAll(mod.getLightModifier().collectNeighbouringChunks(cbp.getBlockPos()));
         }
 
         for (ChunkPos chunkPos : toUpdate) {
-            mod.updateLight(context.getSource().getWorld(), chunkPos);
+            mod.getLightModifier().updateLight(context.getSource().getWorld(), chunkPos);
         }
 
         context.getSource().sendFeedback(

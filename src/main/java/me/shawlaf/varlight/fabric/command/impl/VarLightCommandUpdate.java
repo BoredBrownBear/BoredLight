@@ -43,7 +43,7 @@ public class VarLightCommandUpdate extends VarLightSubCommand {
         BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
         int lightLevel = context.getArgument("light level", int.class);
 
-        LightUpdateResult lightUpdateResult = mod.setLuminance((context.getSource().getEntity() instanceof PlayerEntity ? context.getSource().getPlayer() : null), context.getSource().getWorld(), pos, lightLevel);
+        LightUpdateResult lightUpdateResult = mod.getLightModifier().setLuminance((context.getSource().getEntity() instanceof PlayerEntity ? context.getSource().getPlayer() : null), context.getSource().getWorld(), pos, lightLevel);
 
         if (lightUpdateResult.isSuccess()) {
             context.getSource().sendFeedback(new LiteralText("Updated Light level at Position [" + pos.toShortString() + "] to " + lightLevel), true);

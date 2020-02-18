@@ -4,7 +4,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.command.VarLightSubCommand;
-import me.shawlaf.varlight.fabric.persistence.nbt.VarLightData;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -27,7 +26,7 @@ public class VarLightCommandStepsize extends VarLightSubCommand {
     }
 
     private int execute(ServerCommandSource source, ServerPlayerEntity player, int stepsize) {
-        VarLightData.get(player).setStepSize(stepsize);
+        mod.getPlayerDataManager().getData(player).setStepSize(stepsize);
 
         source.sendFeedback(new LiteralText("Updated Stepsize to " + stepsize), false);
 

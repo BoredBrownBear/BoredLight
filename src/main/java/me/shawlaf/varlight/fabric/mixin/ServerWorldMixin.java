@@ -2,7 +2,7 @@ package me.shawlaf.varlight.fabric.mixin;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
-import me.shawlaf.varlight.fabric.persistence.nbt.VarLightData;
+import me.shawlaf.varlight.fabric.persistence.nbt.VarLightPlayerData;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -68,7 +68,7 @@ public abstract class ServerWorldMixin extends World {
             method = "removePlayer"
     )
     public void afterRemovePlayer(ServerPlayerEntity player, CallbackInfo ci) {
-        VarLightData.remove(player);
+        VarLightMod.INSTANCE.getPlayerDataManager().remove(player);
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class ServerWorldMixin extends World {
             return;
         }
 
-        VarLightMod.INSTANCE.updateLight(castThis(), blockPos);
+        VarLightMod.INSTANCE.getLightModifier().updateLight(castThis(), blockPos);
     }
 
     private ServerWorld castThis() {
@@ -91,6 +91,6 @@ public abstract class ServerWorldMixin extends World {
     }
 
     private WorldLightSourceManager getManager() {
-        return VarLightMod.INSTANCE.getManager(castThis());
+        return VarLightMod.INSTANCE.getLightStorageManager().getManager(castThis());
     }
 }

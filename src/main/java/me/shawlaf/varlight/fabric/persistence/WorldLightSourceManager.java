@@ -45,7 +45,7 @@ public class WorldLightSourceManager {
         this.worldMap = new HashMap<>();
 
         synchronized (worldMap) {
-            mod.getVarLightSaveDirectory(world);
+            mod.getLightStorageManager().getVarLightSaveDirectory(world);
 
             // TODO migrations
         }
@@ -70,7 +70,7 @@ public class WorldLightSourceManager {
     }
 
     public PersistentLightSource createPersistentLightSource(IntPosition position, int emittingLight) {
-        PersistentLightSource pls = new PersistentLightSource(world, position, emittingLight);
+        PersistentLightSource pls = new PersistentLightSource(mod, world, position, emittingLight);
         pls.migrated = true; // pre 1.14.2 not supported -> New Lightsources always migrated
 
         try {
@@ -141,7 +141,7 @@ public class WorldLightSourceManager {
         synchronized (worldMap) {
             if (!worldMap.containsKey(regionCoords)) {
                 try {
-                    worldMap.put(regionCoords, new RegionPersistor<PersistentLightSource>(mod.getVarLightSaveDirectory(world), regionCoords.x, regionCoords.z, true) {
+                    worldMap.put(regionCoords, new RegionPersistor<PersistentLightSource>(mod.getLightStorageManager().getVarLightSaveDirectory(world), regionCoords.x, regionCoords.z, true) {
                         @Override
                         protected PersistentLightSource[] createArray(int i) {
                             return new PersistentLightSource[i];
@@ -149,7 +149,7 @@ public class WorldLightSourceManager {
 
                         @Override
                         protected PersistentLightSource createInstance(IntPosition pos, int lightLevel, boolean migrated, String type) {
-                            return new PersistentLightSource(pos, Registry.BLOCK.get(new Identifier(type)), migrated, world, lightLevel);
+                            return new PersistentLightSource(mod, pos, Registry.BLOCK.get(new Identifier(type)), migrated, world, lightLevel);
                         }
                     });
                 } catch (IOException e) {
@@ -162,7 +162,7 @@ public class WorldLightSourceManager {
     }
 
     public List<PersistentLightSource> getAllLightSources() {
-        File saveDir = mod.getVarLightSaveDirectory(this.world);
+        File saveDir = mod.getLightStorageManager().getVarLightSaveDirectory(this.world);
         File[] files = saveDir.listFiles();
 
         if (files == null) {

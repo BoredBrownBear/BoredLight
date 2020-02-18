@@ -1,5 +1,6 @@
 package me.shawlaf.varlight.fabric.mixin;
 
+import me.shawlaf.varlight.fabric.LightUpdateResult;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.util.WorldBlockPosTuple;
 import net.minecraft.block.Block;
@@ -8,6 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -46,7 +48,7 @@ public abstract class BlockMixin implements ItemConvertible {
         ServerWorld world = builder.getWorld();
         BlockPos pos = builder.get(LootContextParameters.POSITION);
 
-        int customLuminance = getMod().getManager(world).getCustomLuminance(pos, 0);
+        int customLuminance = getMod().getLightStorageManager().getManager(world).getCustomLuminance(pos, 0);
 
         if (customLuminance == 0) {
             return;
@@ -77,7 +79,7 @@ public abstract class BlockMixin implements ItemConvertible {
 
             if (silkTouchLevel > 0) {
                 for (ItemStack drop : drops) { // Should in theory be only one, but /shrug
-                    getMod().makeGlowing(drop, customLuminance);
+                    getMod().getGlowingBlockCreator().makeGlowing(drop, customLuminance);
                 }
             } else if (fortuneLevel > 0) {
                 double chance = 1d - (1.5) * Math.exp(-0.6 * fortuneLevel);
@@ -99,11 +101,28 @@ public abstract class BlockMixin implements ItemConvertible {
             at = @At("HEAD")
     )
     public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack, CallbackInfo ci) {
-        if (world.isClient || !(placer instanceof ServerPlayerEntity)) {
+        if (world.isClient) {
             return;
         }
 
-        VarLightMod.INSTANCE.onBlockPlaced((ServerPlayerEntity) placer, itemStack, pos);
+        if (!(itemStack.getItem() instanceof BlockItem)) {
+            return;
+        }
+
+        int ll = VarLightMod.INSTANCE.getGlowingBlockCreator().getGlowingValue(itemStack);
+
+        if (ll > 0) {
+            LightUpdateResult result = VarLightMod.INSTANCE.getLightModifier().setLuminance(
+                    placer instanceof ServerPlayerEntity ? (ServerPlayerEntity) placer : null,
+                    (ServerWorld) placer.world,
+                    pos,
+                    ll
+            );
+
+            if (placer instanceof ServerPlayerEntity) {
+                result.sendActionBarMessage((ServerPlayerEntity) placer);
+            }
+        }
     }
 
     @Inject(
@@ -117,7 +136,7 @@ public abstract class BlockMixin implements ItemConvertible {
 
         ServerWorld serverWorld = (ServerWorld) world;
 
-        int customLuminance = getMod().getManager(serverWorld).getCustomLuminance(pos, 0);
+        int customLuminance = getMod().getLightStorageManager().getManager(serverWorld).getCustomLuminance(pos, 0);
 
         if (customLuminance > 0) {
             lightCache.put(WorldBlockPosTuple.of(serverWorld, pos), customLuminance);
@@ -141,7 +160,7 @@ public abstract class BlockMixin implements ItemConvertible {
         }
 
         // Create the custom light source to allow dropStacks(BlockState, World, BlockPos, BlockEntity, Entity, ItemStack) to read the Custom Light value
-        getMod().getManager(serverWorld).createPersistentLightSource(pos, lightCache.get(key));
+        getMod().getLightStorageManager().getManager(serverWorld).createPersistentLightSource(pos, lightCache.get(key));
     }
 
     @Inject(
@@ -158,7 +177,7 @@ public abstract class BlockMixin implements ItemConvertible {
 
         if (lightCache.remove(key) != null) {
             // Block was broken, delete the temporary light source
-            getMod().getManager(serverWorld).deleteLightSource(pos);
+            getMod().getLightStorageManager().getManager(serverWorld).deleteLightSource(pos);
         }
     }
 

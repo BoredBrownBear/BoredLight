@@ -133,7 +133,7 @@ public class VarLightCommandDebug extends VarLightSubCommand {
         List<PersistentLightSource> lightSources;
 
         try {
-            lightSources = mod.getManager(source.getWorld()).getRegionPersistor(regionCoords).loadAll();
+            lightSources = mod.getLightStorageManager().getManager(source.getWorld()).getRegionPersistor(regionCoords).loadAll();
         } catch (IOException e) {
             source.sendError(new LiteralText("Failed to load Light sources: " + e.getMessage()));
             return -1;
@@ -171,7 +171,7 @@ public class VarLightCommandDebug extends VarLightSubCommand {
     private int listChunk(ServerCommandSource source, int chunkX, int chunkZ, int page) {
         ChunkCoords chunkCoords = new ChunkCoords(chunkX, chunkZ);
 
-        RegionPersistor<PersistentLightSource> regionPersistor = mod.getManager(source.getWorld()).getRegionPersistor(chunkCoords.toRegionCoords());
+        RegionPersistor<PersistentLightSource> regionPersistor = mod.getLightStorageManager().getManager(source.getWorld()).getRegionPersistor(chunkCoords.toRegionCoords());
         List<PersistentLightSource> lightSources;
 
         try {

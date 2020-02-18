@@ -10,25 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class VarLightData implements INbtSerializable {
+public class VarLightPlayerData implements INbtSerializable {
 
-    private static final Map<UUID, VarLightData> PLAYER_DATA = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UUID, VarLightPlayerData> PLAYER_DATA = Collections.synchronizedMap(new HashMap<>());
 
-    public static VarLightData get(ServerPlayerEntity player) {
-
-        VarLightData data = PLAYER_DATA.get(player.getUuid());
-
-        if (data == null) {
-            PLAYER_DATA.put(player.getUuid(), data = new VarLightData(player));
-        }
-
-        return data;
-    }
-
-    public static void remove(ServerPlayerEntity player) {
-        PLAYER_DATA.remove(player.getUuid());
-    }
-
+    @Deprecated
     public static void clear() {
         PLAYER_DATA.clear();
     }
@@ -36,7 +22,7 @@ public class VarLightData implements INbtSerializable {
     private byte stepSize = 1;
     private final ServerPlayerEntity player;
 
-    public VarLightData(ServerPlayerEntity player) {
+    public VarLightPlayerData(ServerPlayerEntity player) {
         this.player = player;
     }
 

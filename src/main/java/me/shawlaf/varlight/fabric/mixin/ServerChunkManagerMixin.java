@@ -1,5 +1,6 @@
 package me.shawlaf.varlight.fabric.mixin;
 
+import me.shawlaf.varlight.fabric.IScheduledTaskManager;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.world.chunk.ChunkManager;
@@ -16,8 +17,10 @@ public abstract class ServerChunkManagerMixin extends ChunkManager {
             method = "tick()Z"
     )
     public void beforeTick(CallbackInfoReturnable<Boolean> ci) {
-        while (!VarLightMod.TASKS.isEmpty()) {
-            VarLightMod.TASKS.remove().run();
+        IScheduledTaskManager scheduler = VarLightMod.INSTANCE.getScheduledTaskManager();
+
+        while (!scheduler.isEmpty()) {
+            scheduler.runNext();
         }
     }
 

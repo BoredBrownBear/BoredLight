@@ -41,7 +41,7 @@ public class VarLightCommandMigrate extends VarLightSubCommand {
 
                 int migrated = 0, failed = 0, skipped = 0;
 
-                WorldLightSourceManager manager = mod.getManager(world);
+                WorldLightSourceManager manager = mod.getLightStorageManager().getManager(world);
 
                 manager.save(null);
 
@@ -76,7 +76,14 @@ public class VarLightCommandMigrate extends VarLightSubCommand {
                     }
                 }
 
-                scs.sendFeedback(new LiteralText(String.format("Migrated %d / %d Light source in World %s (Failed: %d; Skipped: %d)", migrated, lightSources.size(), mod.getKey(world), failed, skipped)).formatted(Formatting.ITALIC, Formatting.GRAY), true);
+                scs.sendFeedback(
+                        new LiteralText(String.format("Migrated %d / %d Light source in World %s (Failed: %d; Skipped: %d)",
+                                migrated,
+                                lightSources.size(),
+                                mod.getLightStorageManager().getWorldIdentifier(world),
+                                failed,
+                                skipped)
+                        ).formatted(Formatting.ITALIC, Formatting.GRAY), true);
 
                 totalMigrated += migrated;
                 totalFailed += failed;

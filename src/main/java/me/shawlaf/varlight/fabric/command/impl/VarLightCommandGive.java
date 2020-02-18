@@ -78,7 +78,7 @@ public class VarLightCommandGive extends VarLightSubCommand {
                 int toGive = Math.min((amount - given), stack.getItem().getMaxCount());
                 given += toGive;
 
-                ItemStack itemStack = mod.makeGlowing(stack.createStack(toGive, false), lightLevel);
+                ItemStack itemStack = mod.getGlowingBlockCreator().makeGlowing(stack.createStack(toGive, false), lightLevel);
 
                 boolean bl = spe.inventory.insertStack(itemStack);
 

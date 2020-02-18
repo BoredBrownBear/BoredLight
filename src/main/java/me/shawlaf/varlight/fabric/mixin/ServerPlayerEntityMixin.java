@@ -1,7 +1,8 @@
 package me.shawlaf.varlight.fabric.mixin;
 
 import com.mojang.authlib.GameProfile;
-import me.shawlaf.varlight.fabric.persistence.nbt.VarLightData;
+import me.shawlaf.varlight.fabric.VarLightMod;
+import me.shawlaf.varlight.fabric.persistence.nbt.VarLightPlayerData;
 import net.minecraft.container.ContainerListener;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +27,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Co
     public void onWriteCustomDataToTag(CompoundTag tag, CallbackInfo ci) {
         CompoundTag subTag = new CompoundTag();
 
-        VarLightData data = VarLightData.get(castThis());
+        VarLightPlayerData data = VarLightMod.INSTANCE.getPlayerDataManager().getData(castThis());
         data.writeToTag(subTag);
 
         tag.put(data.getKey().toString(), subTag);
@@ -37,7 +38,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Co
             method = "readCustomDataFromTag"
     )
     public void onReadCustomDataFromTag(CompoundTag tag, CallbackInfo ci) {
-        VarLightData data = VarLightData.get(castThis());
+        VarLightPlayerData data = VarLightMod.INSTANCE.getPlayerDataManager().getData(castThis());
 
         if (tag.contains(data.getKey().toString(), 10)) {
             data.readFromTag(tag.getCompound(data.getKey().toString()));

@@ -19,23 +19,28 @@ public class PersistentLightSource implements ICustomLightSource {
     private final Block type;
     boolean migrated = false;
     private transient ServerWorld world;
+    private transient VarLightMod mod;
     private int emittingLight;
 
-    PersistentLightSource(ServerWorld world, IntPosition position, int emittingLight) {
+    PersistentLightSource(VarLightMod mod, ServerWorld world, IntPosition position, int emittingLight) {
+        Objects.requireNonNull(mod);
         Objects.requireNonNull(world);
         Objects.requireNonNull(position);
 
+        this.mod = mod;
         this.world = world;
         this.position = position;
         this.type = getBlockState(position, world).getBlock();
         this.emittingLight = (emittingLight & 0xF);
     }
 
-    PersistentLightSource(IntPosition position, Block type, boolean migrated, ServerWorld world, int emittingLight) {
+    PersistentLightSource(VarLightMod mod, IntPosition position, Block type, boolean migrated, ServerWorld world, int emittingLight) {
+        Objects.requireNonNull(mod);
         Objects.requireNonNull(position);
         Objects.requireNonNull(type);
         Objects.requireNonNull(world);
 
+        this.mod = mod;
         this.position = position;
         this.type = type;
         this.migrated = migrated;
@@ -79,7 +84,7 @@ public class PersistentLightSource implements ICustomLightSource {
                 return false;
             }
 
-            boolean success = VarLightMod.INSTANCE.setLuminance(null, world, blockPos, emittingLight).isSuccess();
+            boolean success = mod.getLightModifier().setLuminance(null, world, blockPos, emittingLight).isSuccess();
 
             migrated = success;
 
