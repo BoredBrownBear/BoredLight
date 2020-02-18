@@ -18,6 +18,7 @@ public class VarLightCommand {
             VarLightCommandGive.class,
             VarLightCommandMigrate.class,
             VarLightCommandUpdate.class,
+            VarLightCommandStepsize.class,
     };
 
     private final VarLightMod mod;

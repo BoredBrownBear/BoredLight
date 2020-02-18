@@ -6,7 +6,9 @@
     "ServerWorldMixin",
     "WorldChunkMixin",
     "BlockMixin",
-    "ServerChunkManagerMixin"
+    "ServerChunkManagerMixin",
+    "ServerPlayerEntityMixin",
+    "MinecraftServerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

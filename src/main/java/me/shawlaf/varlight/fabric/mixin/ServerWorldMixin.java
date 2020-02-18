@@ -2,8 +2,10 @@ package me.shawlaf.varlight.fabric.mixin;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
+import me.shawlaf.varlight.fabric.persistence.nbt.VarLightData;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.BlockState;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ProgressListener;
@@ -59,6 +61,14 @@ public abstract class ServerWorldMixin extends World {
         }
 
         getManager().save(null);
+    }
+
+    @Inject(
+            at = @At("TAIL"),
+            method = "removePlayer"
+    )
+    public void afterRemovePlayer(ServerPlayerEntity player, CallbackInfo ci) {
+        VarLightData.remove(player);
     }
 
     @Override

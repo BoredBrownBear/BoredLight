@@ -2,6 +2,7 @@ package me.shawlaf.varlight.fabric;
 
 import me.shawlaf.varlight.fabric.command.VarLightCommand;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
+import me.shawlaf.varlight.fabric.persistence.nbt.VarLightData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -53,12 +54,10 @@ public class VarLightMod implements ModInitializer {
 
     private final Map<String, WorldLightSourceManager> managers = new HashMap<>();
 
-    {
-        INSTANCE = this;
-    }
-
     @Override
     public void onInitialize() {
+        INSTANCE = this;
+
         this.command.register();
 
         UseBlockCallback.EVENT.register((playerEntity, world, hand, blockHitResult) -> {
@@ -283,13 +282,20 @@ public class VarLightMod implements ModInitializer {
         }
 
         int fromLight = world.getLuminance(blockPos); // Will return custom Luminance thanks to Mixins
+
+        if (mod > 0) {
+            mod *= Math.min(Math.min(VarLightData.get(player).getStepSize(), stack.getCount()), 15 - fromLight);
+        } else {
+            mod *= Math.min(VarLightData.get(player).getStepSize(), fromLight);
+        }
+
         int toLight = fromLight + mod;
 
         LightUpdateResult result = setLuminance(player, world, blockPos, toLight);
 
         if (result.isSuccess()) {
             if (player.interactionManager.isSurvivalLike() && mod > 0) {
-                stack.decrement(1);
+                stack.decrement(Math.abs(mod));
             }
         }
 
