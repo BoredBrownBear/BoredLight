@@ -4,6 +4,7 @@ import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.persistence.ICustomLightSource;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -16,7 +17,7 @@ import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toBlockPos;
 public class PersistentLightSource implements ICustomLightSource {
 
     private final IntPosition position;
-    private final Block type;
+    private Block type;
     boolean migrated = false;
     private transient ServerWorld world;
     private transient VarLightMod mod;
@@ -98,8 +99,19 @@ public class PersistentLightSource implements ICustomLightSource {
         return false; // TODO
     }
 
-    public String toCompactString(boolean colored) {
-        return toString(); // TODO
+    public void update(WorldLightSourceManager manager, BlockState oldState, BlockState newState) {
+        mod.getScheduledTaskManager().enqueue(() -> {
+            if (oldState.getBlock() == newState.getBlock() || newState.isFullCube(world, toBlockPos(position))) {
+                Block oldType = type;
+                type = newState.getBlock();
+
+                if (oldType != type) {
+                    manager.getRegionPersistor(position.toRegionCoords()).markDirty(position);
+                }
+            } else {
+                manager.deleteLightSource(toBlockPos(position));
+            }
+        });
     }
 
     @Override

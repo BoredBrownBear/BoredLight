@@ -1,6 +1,7 @@
 package me.shawlaf.varlight.fabric.mixin;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
+import me.shawlaf.varlight.fabric.persistence.PersistentLightSource;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
 import me.shawlaf.varlight.fabric.persistence.nbt.VarLightPlayerData;
 import me.shawlaf.varlight.util.IntPosition;
@@ -37,8 +38,10 @@ public abstract class ServerWorldMixin extends World {
 
         WorldLightSourceManager manager = getManager();
 
-        if (manager.getCustomLuminance(position, 0) > 0 && oldBlock != newBlock) {
-            manager.deleteLightSource(pos);
+        PersistentLightSource pls = manager.getPersistentLightSource(position);
+
+        if (pls != null) {
+            pls.update(manager, oldBlock, newBlock);
             return;
         }
 
