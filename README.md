@@ -20,4 +20,5 @@ Commands:
 -   `/varlight fill`: Fill an entire region with Light sources (Syntax: `/varlight fill <pos 1> <pos 2> <light level> [include|exclude] [include filter|exclude filter]`)
 -   `/varlight give`: Like the vanilla `/give` command, but receive a glowing version of the block instead
 -   `/varlight debug`: List custom light sources
+-   `/varlight stepsize`: Use any interval from 1-15 instead of 1 per click (Syntax: `/varlight stepsize <1-15>`)
 -   `/varlight migrate`: Used when importing a world from a <1.14.2 Spigot server that ran [VarLight](https://github.com/flori-schwa/VarLight)
