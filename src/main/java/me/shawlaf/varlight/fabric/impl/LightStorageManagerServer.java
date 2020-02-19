@@ -38,7 +38,7 @@ public class LightStorageManagerServer implements ILightStorageManager {
     }
 
     @Override
-    public void onServerShutdown() {
-        managers.clear();
+    public void onWorldUnload(ServerWorld world) {
+        managers.remove(getWorldIdentifier(world));
     }
 }

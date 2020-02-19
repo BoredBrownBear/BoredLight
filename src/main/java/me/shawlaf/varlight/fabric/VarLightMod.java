@@ -9,10 +9,12 @@ import me.shawlaf.varlight.fabric.util.PlayerUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
@@ -76,6 +78,8 @@ public class VarLightMod implements ModInitializer, IModComponent {
                     -1
             );
         });
+
+        ServerStopCallback.EVENT.register(s -> onServerShutdown());
 
         this.lightModifier = new LightModifierServer(this);
         this.storageManager = new LightStorageManagerServer(this);
