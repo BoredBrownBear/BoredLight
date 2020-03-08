@@ -16,7 +16,6 @@ public class VarLightCommand {
             VarLightCommandDebug.class,
             VarLightCommandFill.class,
             VarLightCommandGive.class,
-            VarLightCommandMigrate.class,
             VarLightCommandUpdate.class,
             VarLightCommandStepsize.class,
     };
@@ -25,23 +24,6 @@ public class VarLightCommand {
 
     public VarLightCommand(VarLightMod mod) {
         this.mod = mod;
-    }
-
-    public void register() {
-        CommandRegistry.INSTANCE.register(false, dispatcher -> {
-            LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.literal("varlight");
-
-            for (Class commandClass : COMMANDS) {
-                try {
-                    VarLightSubCommand subCommand = (VarLightSubCommand) commandClass.getConstructor(VarLightMod.class).newInstance(mod);
-                    root.then(subCommand.build(LiteralArgumentBuilder.literal(subCommand.getName())));
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    mod.getLogger().error("Failed to register command " + commandClass.getSimpleName(), e);
-                }
-            }
-
-            dispatcher.register(root);
-        });
     }
 
     public static int getAmountPages(List<?> all, int pageSize) {
@@ -62,6 +44,23 @@ public class VarLightCommand {
         }
 
         return toReturn;
+    }
+
+    public void register() {
+        CommandRegistry.INSTANCE.register(false, dispatcher -> {
+            LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.literal("varlight");
+
+            for (Class commandClass : COMMANDS) {
+                try {
+                    VarLightSubCommand subCommand = (VarLightSubCommand) commandClass.getConstructor(VarLightMod.class).newInstance(mod);
+                    root.then(subCommand.build(LiteralArgumentBuilder.literal(subCommand.getName())));
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    mod.getLogger().error("Failed to register command " + commandClass.getSimpleName(), e);
+                }
+            }
+
+            dispatcher.register(root);
+        });
     }
 
 }

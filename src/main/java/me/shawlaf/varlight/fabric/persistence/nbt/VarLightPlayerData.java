@@ -7,8 +7,8 @@ import net.minecraft.util.Identifier;
 
 public class VarLightPlayerData implements INbtSerializable {
 
-    private byte stepSize = 1;
     private final ServerPlayerEntity player;
+    private byte stepSize = 1;
 
     public VarLightPlayerData(ServerPlayerEntity player) {
         this.player = player;

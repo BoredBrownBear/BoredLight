@@ -1,9 +1,7 @@
 package me.shawlaf.varlight.fabric.mixin;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
-import me.shawlaf.varlight.fabric.persistence.PersistentLightSource;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
-import me.shawlaf.varlight.fabric.persistence.nbt.VarLightPlayerData;
 import me.shawlaf.varlight.util.IntPosition;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.BiFunction;
 
+import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toBlockPos;
 import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toIntPosition;
 
 @Mixin(ServerWorld.class)
@@ -38,10 +37,15 @@ public abstract class ServerWorldMixin extends World {
 
         WorldLightSourceManager manager = getManager();
 
-        PersistentLightSource pls = manager.getPersistentLightSource(position);
+        int lum = manager.getCustomLuminance(pos, 0);
 
-        if (pls != null) {
-            pls.update(manager, oldBlock, newBlock);
+        if (lum != 0) {
+            manager.getMod().getScheduledTaskManager().enqueue(() -> {
+                if (oldBlock.getBlock() != newBlock.getBlock() && !newBlock.isFullCube(castThis(), toBlockPos(position))) {
+                    manager.deleteLightSource(toBlockPos(position));
+                }
+            });
+
             return;
         }
 

@@ -42,14 +42,14 @@ public class LightModifierServer implements ILightModifier {
 
         WorldLightSourceManager manager = mod.getLightStorageManager().getManager(world);
 
-        if (doLightUpdate) {
-            manager.deleteLightSource(blockPos);
+        manager.deleteLightSource(blockPos);
 
+        if (doLightUpdate) {
             ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).checkBlock(blockPos);
         }
 
         if (lightLevel > 0) {
-            manager.createPersistentLightSource(blockPos, lightLevel);
+            manager.setCustomLuminance(blockPos, lightLevel);
         }
 
         if (doLightUpdate) {
