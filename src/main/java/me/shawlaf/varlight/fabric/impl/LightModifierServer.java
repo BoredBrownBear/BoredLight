@@ -49,7 +49,7 @@ public class LightModifierServer implements ILightModifier {
         }
 
         if (lightLevel > 0) {
-            manager.createPersistentLightSource(blockPos, lightLevel);
+            manager.setCustomLuminance(blockPos, lightLevel);
         }
 
         if (doLightUpdate) {

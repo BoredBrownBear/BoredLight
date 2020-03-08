@@ -1,6 +1,7 @@
 package me.shawlaf.varlight.fabric;
 
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
+import me.shawlaf.varlight.fabric.persistence.migrate.LightDatabaseMigratorFabric;
 import net.minecraft.server.world.ServerWorld;
 
 import java.io.File;
@@ -23,4 +24,6 @@ public interface ILightStorageManager extends IModComponent {
 
         return saveDir;
     }
+
+    LightDatabaseMigratorFabric getDatabaseMigrator();
 }

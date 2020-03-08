@@ -160,7 +160,7 @@ public abstract class BlockMixin implements ItemConvertible {
         }
 
         // Create the custom light source to allow dropStacks(BlockState, World, BlockPos, BlockEntity, Entity, ItemStack) to read the Custom Light value
-        getMod().getLightStorageManager().getManager(serverWorld).createPersistentLightSource(pos, lightCache.get(key));
+        getMod().getLightStorageManager().getManager(serverWorld).setCustomLuminance(pos, lightCache.get(key));
     }
 
     @Inject(

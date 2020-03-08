@@ -1,19 +1,15 @@
 package me.shawlaf.varlight.fabric.persistence;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
-import me.shawlaf.varlight.fabric.util.OpPermissionLevel;
 import me.shawlaf.varlight.persistence.LightPersistFailedException;
 import me.shawlaf.varlight.persistence.RegionPersistor;
+import me.shawlaf.varlight.persistence.nls.NLSFile;
 import me.shawlaf.varlight.util.ChunkCoords;
-import me.shawlaf.varlight.util.FileUtil;
 import me.shawlaf.varlight.util.IntPosition;
 import me.shawlaf.varlight.util.RegionCoords;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -22,18 +18,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.IntSupplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toIntPosition;
 
 public class WorldLightSourceManager {
 
-    private final Map<RegionCoords, RegionPersistor<PersistentLightSource>> worldMap;
+    private final Map<RegionCoords, NLSFile> worldMap;
     private final ServerWorld world;
     private final VarLightMod mod;
-
-    private long lastMigrateNotice;
 
     public WorldLightSourceManager(VarLightMod mod, ServerWorld world) {
         Objects.requireNonNull(world);
@@ -41,13 +33,12 @@ public class WorldLightSourceManager {
 
         this.mod = mod;
         this.world = world;
-
         this.worldMap = new HashMap<>();
 
         synchronized (worldMap) {
             mod.getLightStorageManager().getVarLightSaveDirectory(world);
 
-            // TODO migrations
+            mod.getLightStorageManager().getDatabaseMigrator().runMigrations(world);
         }
 
         mod.getLogger().debug(String.format("Created a new Lightsource Persistor for world \"%s\"", world.getLevelProperties().getLevelName()));
@@ -62,24 +53,7 @@ public class WorldLightSourceManager {
     }
 
     public void deleteLightSource(BlockPos blockPos) {
-        createPersistentLightSource(blockPos, 0);
-    }
-
-    public PersistentLightSource createPersistentLightSource(BlockPos blockPos, int emittingLight) {
-        return createPersistentLightSource(toIntPosition(blockPos), emittingLight);
-    }
-
-    public PersistentLightSource createPersistentLightSource(IntPosition position, int emittingLight) {
-        PersistentLightSource pls = new PersistentLightSource(mod, world, position, emittingLight);
-        pls.migrated = true; // pre 1.14.2 not supported -> New Lightsources always migrated
-
-        try {
-            getRegionPersistor(new RegionCoords(position)).put(pls);
-        } catch (IOException e) {
-            throw new LightPersistFailedException(e);
-        }
-
-        return pls;
+        setCustomLuminance(blockPos, 0);
     }
 
     public int getCustomLuminance(BlockPos pos, int def) {
@@ -91,152 +65,93 @@ public class WorldLightSourceManager {
     }
 
     public int getCustomLuminance(IntPosition position, IntSupplier def) {
-        PersistentLightSource pls = getPersistentLightSource(position);
+        int custom = getNLSFile(position.toRegionCoords()).getCustomLuminance(position);
 
-        if (pls == null) {
+        if (custom == 0) {
             return def.getAsInt();
         }
 
-        return pls.getEmittingLight();
+        return custom;
     }
 
-    public PersistentLightSource getPersistentLightSource(IntPosition position) {
-        RegionPersistor<PersistentLightSource> region = getRegionPersistor(new RegionCoords(position));
-
-        PersistentLightSource pls;
-
-        try {
-            pls = region.getLightSource(position);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to get Custom Light source: " + e.getMessage(), e);
-        }
-
-        if (pls == null) {
-            return null;
-        }
-
-        if (!pls.isMigrated() && (System.currentTimeMillis() - lastMigrateNotice) > 30_000L) {
-            Text text = new LiteralText(String.format("[VarLight] There are non-migrated Light sources present in world \"%s\", please run /varlight migrate!", world.getLevelProperties().getLevelName()));
-
-            Style style = new Style();
-            style.setColor(Formatting.RED);
-
-            text.setStyle(style);
-
-            for (ServerPlayerEntity playerEntity : world.getServer().getPlayerManager().getPlayerList()) {
-                if (!playerEntity.allowsPermissionLevel(OpPermissionLevel.MANAGE_SERVER)) {
-                    continue;
-                }
-
-                playerEntity.sendMessage(text);
-            }
-
-            lastMigrateNotice = System.currentTimeMillis();
-        }
-
-        return pls;
+    public void setCustomLuminance(BlockPos blockPos, int luminance) {
+        setCustomLuminance(toIntPosition(blockPos), luminance);
     }
 
-    public RegionPersistor<PersistentLightSource> getRegionPersistor(RegionCoords regionCoords) {
+    public void setCustomLuminance(IntPosition position, int luminance) {
+        getNLSFile(position.toRegionCoords()).setCustomLuminance(position, luminance);
+    }
+
+    public NLSFile getNLSFile(RegionCoords regionCoords) {
         synchronized (worldMap) {
             if (!worldMap.containsKey(regionCoords)) {
-                try {
-                    worldMap.put(regionCoords, new RegionPersistor<PersistentLightSource>(mod.getLightStorageManager().getVarLightSaveDirectory(world), regionCoords.x, regionCoords.z, true) {
-                        @Override
-                        protected PersistentLightSource[] createArray(int i) {
-                            return new PersistentLightSource[i];
-                        }
+                File file = new File(mod.getLightStorageManager().getVarLightSaveDirectory(world), String.format(NLSFile.FILE_NAME_FORMAT, regionCoords.x, regionCoords.z));
+                NLSFile nlsFile;
 
-                        @Override
-                        protected PersistentLightSource createInstance(IntPosition pos, int lightLevel, boolean migrated, String type) {
-                            return new PersistentLightSource(mod, pos, Registry.BLOCK.get(new Identifier(type)), migrated, world, lightLevel);
-                        }
-                    });
+                try {
+                    if (file.exists()) {
+                        nlsFile = NLSFile.existingFile(file);
+                    } else {
+                        nlsFile = NLSFile.newFile(file, regionCoords.x, regionCoords.z);
+                    }
                 } catch (IOException e) {
-                    throw new RuntimeException("Could not create region persistor for region (" + regionCoords.x + ", " + regionCoords.z + "): " + e.getMessage(), e);
+                    throw new LightPersistFailedException(e);
                 }
+
+                worldMap.put(regionCoords, nlsFile);
             }
 
             return worldMap.get(regionCoords);
         }
     }
 
-    public List<PersistentLightSource> getAllLightSources() {
-        File saveDir = mod.getLightStorageManager().getVarLightSaveDirectory(this.world);
-        File[] files = saveDir.listFiles();
-
-        if (files == null) {
-            throw new LightPersistFailedException("Failed to list Files in " + saveDir.getAbsolutePath());
-        }
-
-        for (File regionFile : files) {
-            getRegionPersistor(FileUtil.parseRegionCoordsFromFileName(regionFile.getName()));
-        }
-
-        synchronized (worldMap) {
-            return worldMap.values().stream().flatMap(persistor -> {
-                try {
-                    return persistor.loadAll().stream();
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                    return Stream.empty();
-                }
-            }).collect(Collectors.toList());
-        }
-    }
-
     public void save(ServerPlayerEntity source) {
         int modified = 0, deleted = 0;
-        List<RegionCoords> toUnload = new ArrayList<>();
+        List<RegionCoords> regionsToUnload = new ArrayList<>();
 
         synchronized (worldMap) {
-            for (RegionPersistor<PersistentLightSource> region : worldMap.values()) {
-                int loaded = 0;
+            for (NLSFile nlsFile : worldMap.values()) {
 
                 try {
-                    region.flushAll();
-                } catch (IOException e) {
-                    throw new LightPersistFailedException(e);
-                }
-
-                List<ChunkCoords> affected = region.getAffectedChunks();
-
-                if (affected.size() == 0) {
-                    if (region.file.file.exists()) {
-                        if (!region.file.delete()) {
-                            throw new LightPersistFailedException("Could not delete file " + region.file.file.getAbsolutePath());
-                        }
-
-                        mod.getLogger().debug("Deleted File " + region.file.file.getAbsolutePath());
-
-                        ++deleted;
-                    }
-
-                    toUnload.add(new RegionCoords(region.regionX, region.regionZ));
-                    continue;
-                }
-
-                try {
-                    if (region.save()) {
+                    if (nlsFile.save()) {
                         ++modified;
                     }
                 } catch (IOException e) {
                     throw new LightPersistFailedException(e);
                 }
 
+                List<ChunkCoords> affected = nlsFile.getAffectedChunks();
+
+                if (affected.size() == 0) {
+                    if (nlsFile.file.exists()) {
+                        if (!nlsFile.file.delete()) {
+                            throw new LightPersistFailedException("Could not delete file " + nlsFile.file.getAbsolutePath());
+                        } else {
+                            mod.getLogger().debug(String.format("Deleted File %s", nlsFile.file.getName()));
+
+                            ++deleted;
+                        }
+                    }
+
+                    regionsToUnload.add(nlsFile.getRegionCoords());
+                    continue;
+                }
+
+                boolean anyLoaded = false;
+
                 for (ChunkCoords chunkCoords : affected) {
                     if (world.isChunkLoaded(chunkCoords.x, chunkCoords.z)) {
-                        ++loaded;
+                        anyLoaded = true;
+                        break;
                     }
                 }
 
-                if (loaded == 0) {
-                    toUnload.add(new RegionCoords(region.regionX, region.regionZ));
+                if (!anyLoaded) {
+                    regionsToUnload.add(nlsFile.getRegionCoords());
                 }
             }
 
-            for (RegionCoords regionCoords : toUnload) {
+            for (RegionCoords regionCoords : regionsToUnload) {
                 worldMap.remove(regionCoords).unload();
             }
         }
