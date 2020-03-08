@@ -16,7 +16,6 @@ public class VarLightCommand {
             VarLightCommandDebug.class,
             VarLightCommandFill.class,
             VarLightCommandGive.class,
-            VarLightCommandMigrate.class,
             VarLightCommandUpdate.class,
             VarLightCommandStepsize.class,
     };
