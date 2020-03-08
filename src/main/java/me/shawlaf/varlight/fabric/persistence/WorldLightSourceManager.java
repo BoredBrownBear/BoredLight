@@ -2,7 +2,6 @@ package me.shawlaf.varlight.fabric.persistence;
 
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.persistence.LightPersistFailedException;
-import me.shawlaf.varlight.persistence.RegionPersistor;
 import me.shawlaf.varlight.persistence.nls.NLSFile;
 import me.shawlaf.varlight.util.ChunkCoords;
 import me.shawlaf.varlight.util.IntPosition;
@@ -10,9 +9,7 @@ import me.shawlaf.varlight.util.RegionCoords;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 
 import java.io.File;
 import java.io.IOException;

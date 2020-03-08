@@ -9,13 +9,13 @@ public class WorldBlockPosTuple {
     private final World world;
     private final BlockPos blockPos;
 
-    public static WorldBlockPosTuple of(World world, BlockPos blockPos) {
-        return new WorldBlockPosTuple(world, blockPos);
-    }
-
     private WorldBlockPosTuple(World world, BlockPos blockPos) {
         this.world = world;
         this.blockPos = blockPos;
+    }
+
+    public static WorldBlockPosTuple of(World world, BlockPos blockPos) {
+        return new WorldBlockPosTuple(world, blockPos);
     }
 
     @Override

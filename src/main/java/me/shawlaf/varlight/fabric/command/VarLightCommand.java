@@ -26,23 +26,6 @@ public class VarLightCommand {
         this.mod = mod;
     }
 
-    public void register() {
-        CommandRegistry.INSTANCE.register(false, dispatcher -> {
-            LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.literal("varlight");
-
-            for (Class commandClass : COMMANDS) {
-                try {
-                    VarLightSubCommand subCommand = (VarLightSubCommand) commandClass.getConstructor(VarLightMod.class).newInstance(mod);
-                    root.then(subCommand.build(LiteralArgumentBuilder.literal(subCommand.getName())));
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    mod.getLogger().error("Failed to register command " + commandClass.getSimpleName(), e);
-                }
-            }
-
-            dispatcher.register(root);
-        });
-    }
-
     public static int getAmountPages(List<?> all, int pageSize) {
         return (all.size() / pageSize) + (all.size() % pageSize > 0 ? 1 : 0);
     }
@@ -61,6 +44,23 @@ public class VarLightCommand {
         }
 
         return toReturn;
+    }
+
+    public void register() {
+        CommandRegistry.INSTANCE.register(false, dispatcher -> {
+            LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.literal("varlight");
+
+            for (Class commandClass : COMMANDS) {
+                try {
+                    VarLightSubCommand subCommand = (VarLightSubCommand) commandClass.getConstructor(VarLightMod.class).newInstance(mod);
+                    root.then(subCommand.build(LiteralArgumentBuilder.literal(subCommand.getName())));
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    mod.getLogger().error("Failed to register command " + commandClass.getSimpleName(), e);
+                }
+            }
+
+            dispatcher.register(root);
+        });
     }
 
 }

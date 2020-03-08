@@ -5,7 +5,6 @@ import me.shawlaf.varlight.persistence.migrate.LightDatabaseMigrator;
 import net.minecraft.server.world.ServerWorld;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 public class LightDatabaseMigratorFabric extends LightDatabaseMigrator<ServerWorld> {
 
