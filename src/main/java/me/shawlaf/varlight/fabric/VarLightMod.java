@@ -5,6 +5,7 @@ import me.shawlaf.varlight.fabric.impl.LightModifierServer;
 import me.shawlaf.varlight.fabric.impl.LightStorageManagerServer;
 import me.shawlaf.varlight.fabric.impl.PlayerDataManagerServer;
 import me.shawlaf.varlight.fabric.impl.ScheduledTaskManagerServer;
+import me.shawlaf.varlight.fabric.persistence.migrate.LightDatabaseMigratorFabric;
 import me.shawlaf.varlight.fabric.util.PlayerUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -14,7 +15,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
@@ -30,12 +30,14 @@ public class VarLightMod implements ModInitializer, IModComponent {
 
     private final VarLightCommand command = new VarLightCommand(this);
     private final Logger logger = LogManager.getLogger("VarLight");
+    private final java.util.logging.Logger javaUtilLogger = java.util.logging.Logger.getLogger("VarLight");
 
     private ILightModifier lightModifier;
     private ILightStorageManager storageManager;
     private GlowingBlockCreator glowingBlockCreator;
     private IPlayerDataManager playerDataManager;
     private IScheduledTaskManager scheduledTaskManager;
+    private LightDatabaseMigratorFabric databaseMigrator;
 
     @Override
     public void onInitialize() {
@@ -116,6 +118,10 @@ public class VarLightMod implements ModInitializer, IModComponent {
 
     public Logger getLogger() {
         return logger;
+    }
+
+    public java.util.logging.Logger getJavaUtilLogger() {
+        return javaUtilLogger;
     }
 
     public ILightModifier getLightModifier() {

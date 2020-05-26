@@ -10,18 +10,38 @@ import net.minecraft.server.world.ServerLightingProvider;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.thread.TaskExecutor;
 import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.light.ChunkBlockLightProvider;
 import net.minecraft.world.chunk.light.LightingProvider;
 
+import java.lang.reflect.Field;
+
 public class LightModifierServer implements ILightModifier {
 
     private final VarLightMod mod;
+    private final Field processorField;
 
     public LightModifierServer(VarLightMod mod) {
+        Field processorField1;
         this.mod = mod;
+
+        try {
+            //noinspection JavaReflectionMemberAccess : Intermediary name
+            processorField1 = ServerLightingProvider.class.getDeclaredField("field_17255");
+        } catch (NoSuchFieldException ignored) {
+            try {
+                processorField1 = ServerLightingProvider.class.getDeclaredField("processor");
+            } catch (NoSuchFieldException e1) {
+                throw new RuntimeException("Failed to find both intermediary and named versions of net.minecraft.server.world.ServerLightingProvider.processor", e1);
+            }
+        }
+
+        this.processorField = processorField1;
+        this.processorField.setAccessible(true);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public LightUpdateResult setLuminance(PlayerEntity modifier, ServerWorld world, BlockPos blockPos, int lightLevel, boolean doLightUpdate) {
         if (modifier != null && !world.canPlayerModifyAt(modifier, blockPos)) {
@@ -42,14 +62,22 @@ public class LightModifierServer implements ILightModifier {
 
         WorldLightSourceManager manager = mod.getLightStorageManager().getManager(world);
 
-        if (doLightUpdate) {
-            manager.deleteLightSource(blockPos);
+        manager.deleteLightSource(blockPos);
 
-            ((ChunkBlockLightProvider) world.getLightingProvider().get(LightType.BLOCK)).checkBlock(blockPos);
+        if (doLightUpdate) {
+
+            ServerLightingProvider serverLightingProvider = (ServerLightingProvider) world.getLightingProvider();
+            ChunkBlockLightProvider lightProvider = ((ChunkBlockLightProvider) serverLightingProvider.get(LightType.BLOCK));
+
+            try {
+                ((TaskExecutor<Runnable>) processorField.get(serverLightingProvider)).send(() -> lightProvider.checkBlock(blockPos));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         if (lightLevel > 0) {
-            manager.createPersistentLightSource(blockPos, lightLevel);
+            manager.setCustomLuminance(blockPos, lightLevel);
         }
 
         if (doLightUpdate) {
