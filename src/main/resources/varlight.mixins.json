@@ -3,6 +3,7 @@
   "package": "me.shawlaf.varlight.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "AbstractBlockMixin",
     "ServerWorldMixin",
     "WorldChunkMixin",
     "BlockMixin",

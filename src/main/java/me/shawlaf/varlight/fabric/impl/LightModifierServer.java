@@ -4,6 +4,7 @@ import me.shawlaf.varlight.fabric.ILightModifier;
 import me.shawlaf.varlight.fabric.LightUpdateResult;
 import me.shawlaf.varlight.fabric.VarLightMod;
 import me.shawlaf.varlight.fabric.persistence.WorldLightSourceManager;
+import me.shawlaf.varlight.fabric.util.ReflectionHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket;
 import net.minecraft.server.world.ServerLightingProvider;
@@ -23,21 +24,9 @@ public class LightModifierServer implements ILightModifier {
     private final Field processorField;
 
     public LightModifierServer(VarLightMod mod) {
-        Field processorField1;
         this.mod = mod;
 
-        try {
-            //noinspection JavaReflectionMemberAccess : Intermediary name
-            processorField1 = ServerLightingProvider.class.getDeclaredField("field_17255");
-        } catch (NoSuchFieldException ignored) {
-            try {
-                processorField1 = ServerLightingProvider.class.getDeclaredField("processor");
-            } catch (NoSuchFieldException e1) {
-                throw new RuntimeException("Failed to find both intermediary and named versions of net.minecraft.server.world.ServerLightingProvider.processor", e1);
-            }
-        }
-
-        this.processorField = processorField1;
+        this.processorField = ReflectionHelper.getDeclaredField(ServerLightingProvider.class, "processor", "field_17255");
         this.processorField.setAccessible(true);
     }
 

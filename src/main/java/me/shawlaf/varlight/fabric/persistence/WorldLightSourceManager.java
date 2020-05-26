@@ -10,6 +10,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.MutableWorldProperties;
+import net.minecraft.world.level.ServerWorldProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +40,7 @@ public class WorldLightSourceManager {
             mod.getLightStorageManager().getDatabaseMigrator().runMigrations(world);
         }
 
-        mod.getLogger().debug(String.format("Created a new Lightsource Persistor for world \"%s\"", world.getLevelProperties().getLevelName()));
+        mod.getLogger().debug(String.format("Created a new Lightsource Persistor for world \"%s\"", ((ServerWorldProperties) world.getLevelProperties()).getLevelName()));
     }
 
     public VarLightMod getMod() {
@@ -153,10 +155,10 @@ public class WorldLightSourceManager {
             }
         }
 
-        String msg = String.format("Light Sources persisted for World \"%s\", Files modified: %d, Files deleted: %d", world.getLevelProperties().getLevelName(), modified, deleted);
+        String msg = String.format("Light Sources persisted for World \"%s\", Files modified: %d, Files deleted: %d", ((ServerWorldProperties) world.getLevelProperties()).getLevelName(), modified, deleted);
 
         if (source != null) {
-            source.sendMessage(new LiteralText("[VarLight] " + msg));
+            source.sendMessage(new LiteralText("[VarLight] " + msg), false);
         }
 
         mod.getLogger().debug(msg);

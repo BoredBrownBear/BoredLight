@@ -185,12 +185,12 @@ public class VarLightCommandDebug extends VarLightSubCommand {
     }
 
     private Text generateText(ServerWorld world, IntPosition lightSource, int lightLevel) {
-        Style locationStyle = new Style();
+        Style locationStyle = Style.EMPTY;
 
-        locationStyle.setColor(Formatting.GREEN);
+        locationStyle.withFormatting(Formatting.GREEN); // Returns a new instance of Style
 
         locationStyle.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Teleport.")));
-        locationStyle.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/tp @s %d %d %d", lightSource.x, lightSource.y, lightSource.z)));
+        locationStyle.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/tp @s %d %d %d", lightSource.x, lightSource.y, lightSource.z)));
 
         return new LiteralText(lightSource.toShortString())
                 .setStyle(locationStyle)

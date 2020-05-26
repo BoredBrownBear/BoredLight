@@ -86,7 +86,7 @@ public abstract class LightUpdateResult {
     public abstract boolean isSuccess();
 
     public final void sendActionBarMessage(ServerPlayerEntity spe) {
-        spe.sendChatMessage(getMessage(), MessageType.GAME_INFO);
+        spe.sendMessage(getMessage(), true);
     }
 
     public abstract Text getMessage();

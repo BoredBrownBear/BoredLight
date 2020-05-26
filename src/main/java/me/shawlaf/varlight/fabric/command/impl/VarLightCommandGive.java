@@ -94,7 +94,7 @@ public class VarLightCommandGive extends VarLightSubCommand {
                     }
 
                     spe.world.playSound(null, spe.getX(), spe.getY(), spe.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((spe.getRandom().nextFloat() - spe.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                    spe.playerContainer.sendContentUpdates();
+                    spe.playerScreenHandler.sendContentUpdates();
                 } else {
                     itemEntity = spe.dropItem(itemStack, false);
 

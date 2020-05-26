@@ -7,6 +7,8 @@ import me.shawlaf.varlight.fabric.persistence.migrate.LightDatabaseMigratorFabri
 import me.shawlaf.varlight.fabric.persistence.migrate.data.JsonToNLSMigration;
 import me.shawlaf.varlight.fabric.persistence.migrate.data.VLDBToNLSMigration;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.MutableWorldProperties;
+import net.minecraft.world.level.ServerWorldProperties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +44,7 @@ public class LightStorageManagerServer implements ILightStorageManager {
 
     @Override
     public String getWorldIdentifier(ServerWorld world) {
-        return world.getLevelProperties().getLevelName() + "/" + world.getDimension().getType().toString();
+        return ((ServerWorldProperties) world.getLevelProperties()).getLevelName() + "/" + world.method_27983().toString();
     }
 
     @Override

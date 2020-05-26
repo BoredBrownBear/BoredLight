@@ -37,65 +37,6 @@ public abstract class BlockMixin implements ItemConvertible {
 
     private static final Map<WorldBlockPosTuple, Integer> lightCache = new HashMap<>();
 
-    @Inject(at = @At("RETURN"), method = "getDroppedStacks(Lnet/minecraft/block/BlockState;Lnet/minecraft/loot/context/LootContext$Builder;)Ljava/util/List;")
-    public void onGetDroppedStacks(BlockState state, LootContext.Builder builder, CallbackInfoReturnable<List<ItemStack>> cir) {
-        List<ItemStack> drops = cir.getReturnValue();
-
-        if (drops.isEmpty()) {
-            return;
-        }
-
-        ServerWorld world = builder.getWorld();
-        BlockPos pos = builder.get(LootContextParameters.POSITION);
-
-        int customLuminance = getMod().getLightStorageManager().getManager(world).getCustomLuminance(pos, 0);
-
-        if (customLuminance == 0) {
-            return;
-        }
-
-        ItemStack tool = builder.get(LootContextParameters.TOOL);
-
-        if (tool.isEmpty()) {
-            drops.add(new ItemStack(Items.GLOWSTONE_DUST, 1));
-        } else {
-            int silkTouchLevel = 0, fortuneLevel = 0;
-
-            ListTag enchantments = tool.getEnchantments();
-
-            String silkTouchId = String.valueOf(Registry.ENCHANTMENT.getId(Enchantments.SILK_TOUCH));
-            String fortuneId = String.valueOf(Registry.ENCHANTMENT.getId(Enchantments.FORTUNE));
-
-            for (int i = 0; i < enchantments.size(); i++) {
-                CompoundTag enchantment = enchantments.getCompound(i);
-                String id = enchantment.getString("id");
-
-                if (silkTouchId.equals(id)) {
-                    silkTouchLevel = enchantment.getShort("lvl");
-                } else if (fortuneId.equals(id)) {
-                    fortuneLevel = enchantment.getShort("lvl");
-                }
-            }
-
-            if (silkTouchLevel > 0) {
-                for (ItemStack drop : drops) { // Should in theory be only one, but /shrug
-                    getMod().getGlowingBlockCreator().makeGlowing(drop, customLuminance);
-                }
-            } else if (fortuneLevel > 0) {
-                double chance = 1d - (1.5) * Math.exp(-0.6 * fortuneLevel);
-                int count = 1;
-
-                for (int i = 0; i < customLuminance; i++) {
-                    if (Math.random() <= chance) {
-                        ++count;
-                    }
-                }
-
-                drops.add(new ItemStack(Items.GLOWSTONE_DUST, count));
-            }
-        }
-    }
-
     @Inject(
             method = "onPlaced(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;)V",
             at = @At("HEAD")

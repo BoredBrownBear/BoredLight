@@ -29,7 +29,7 @@ public class GlowingBlockCreator {
 
         ListTag loreTag = new ListTag();
 
-        List<Text> lore = Collections.singletonList(new LiteralText(COLOR_SYMBOL + "rEmitting Light: " + lightLevel));
+        List<Text> lore = Collections.singletonList(new LiteralText(COLOR_SYMBOL + "r" + COLOR_SYMBOL + "fEmitting Light: " + lightLevel));
 
         for (Text text : lore) {
             loreTag.add(StringTag.of(Text.Serializer.toJson(text)));
