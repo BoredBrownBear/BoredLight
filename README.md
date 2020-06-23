@@ -13,6 +13,7 @@ VarLight Allows you to create custom Light sources by right clicking blocks with
 Supported MC Versions:
 
 -   1.15.2
+-   1.16
 
 Commands:
 
