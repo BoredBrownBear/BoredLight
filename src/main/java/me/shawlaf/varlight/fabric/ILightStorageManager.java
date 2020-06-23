@@ -33,7 +33,7 @@ public interface ILightStorageManager extends IModComponent {
             throw new RuntimeException("Failed to get Save Directory for World " + ((ServerWorldProperties) world.getLevelProperties()).getLevelName(), e);
         }
 
-        world.getServer().method_27050(WorldSavePath.ROOT);
+        world.getServer().getSavePath(WorldSavePath.ROOT);
 
         File saveDir = new File(worldRoot, "varlight");
 

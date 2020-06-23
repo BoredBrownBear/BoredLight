@@ -83,7 +83,7 @@ public class LightModifierServer implements ILightModifier {
         ((ServerLightingProvider) provider).light(world.getChunk(chunkPos.x, chunkPos.z), false).thenRun(() -> {
             mod.getScheduledTaskManager().enqueue(() -> {
                 for (ChunkPos pos : collectNeighbouringChunks(chunkPos)) {
-                    LightUpdateS2CPacket packet = new LightUpdateS2CPacket(pos, provider);
+                    LightUpdateS2CPacket packet = new LightUpdateS2CPacket(pos, provider, true);
 
                     world.getChunkManager().threadedAnvilChunkStorage.getPlayersWatchingChunk(pos, false).forEach(spe -> {
                         spe.networkHandler.sendPacket(packet);

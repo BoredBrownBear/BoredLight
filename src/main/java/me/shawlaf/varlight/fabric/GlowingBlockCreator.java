@@ -24,7 +24,7 @@ public class GlowingBlockCreator {
 
         displayTag.putString("Name", Text.Serializer.toJson(
                 new LiteralText(COLOR_SYMBOL + "r" + COLOR_SYMBOL + "6Glowing " +
-                        Language.getInstance().translate(base.getItem().getTranslationKey()))
+                        Language.getInstance().get(base.getItem().getTranslationKey()))
         ));
 
         ListTag loreTag = new ListTag();

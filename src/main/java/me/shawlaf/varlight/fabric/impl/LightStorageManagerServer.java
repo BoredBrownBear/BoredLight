@@ -44,7 +44,7 @@ public class LightStorageManagerServer implements ILightStorageManager {
 
     @Override
     public String getWorldIdentifier(ServerWorld world) {
-        return ((ServerWorldProperties) world.getLevelProperties()).getLevelName() + "/" + world.method_27983().toString();
+        return ((ServerWorldProperties) world.getLevelProperties()).getLevelName() + "/" + world.getDimensionRegistryKey().toString();
     }
 
     @Override

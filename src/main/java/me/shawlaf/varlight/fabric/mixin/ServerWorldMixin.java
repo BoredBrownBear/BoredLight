@@ -10,6 +10,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
@@ -25,8 +26,8 @@ import static me.shawlaf.varlight.fabric.util.IntPositionExtension.toIntPosition
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends World {
-    protected ServerWorldMixin(MutableWorldProperties mutableWorldProperties, DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l) {
-        super(mutableWorldProperties, dimensionType, supplier, bl, bl2, l);
+    protected ServerWorldMixin(MutableWorldProperties mutableWorldProperties, RegistryKey<World> registryKey, RegistryKey<DimensionType> registryKey2, DimensionType dimensionType, Supplier<Profiler> profiler, boolean bl, boolean bl2, long l) {
+        super(mutableWorldProperties, registryKey, registryKey2, dimensionType, profiler, bl, bl2, l);
     }
 
     @Inject(at = @At("INVOKE"), method = "onBlockChanged(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V")
