@@ -8,6 +8,11 @@
   "authors": [
     "shawlaf"
   ],
+  "contact": {
+    "homepage": "https://github.com/flori-schwa/VarLightFabric",
+    "sources": "https://github.com/flori-schwa/VarLightFabric",
+    "issues": "https://github.com/flori-schwa/VarLightFabric/issues",
+  },
 
   "icon": "assets/modid/icon.png",
 
@@ -22,14 +27,10 @@
     "varlight.mixins.json"
   ],
 
-  "contact": {
-    "sources": "https://github.com/flori-schwa/VarLightFabric"
-  },
-
   "depends": {
     "fabricloader": ">=0.8.8",
     "fabric": "*",
-    "minecraft": "1.16.x"
+    "minecraft": "1.16.1"
   },
 
   "suggests": {
