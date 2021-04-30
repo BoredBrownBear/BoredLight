@@ -1,39 +1,37 @@
 {
   "schemaVersion": 1,
-  "id": "varlight",
+  "id": "boredlight",
   "version": "${version}",
 
-  "name": "VarLight",
-  "description": "Turn most blocks into Light sources!",
+  "name": "BoredLight",
+  "description": "Turn most blocks into Light sources! (Fork of VarLight)",
   "authors": [
-    "shawlaf"
+    "shawlaf",
+    "BoredBrownBear"
   ],
   "contact": {
-    "homepage": "https://github.com/flori-schwa/VarLightFabric",
-    "sources": "https://github.com/flori-schwa/VarLightFabric",
-    "issues": "https://github.com/flori-schwa/VarLightFabric/issues"
+    "homepage": "https://github.com/BoredBrownBear/BoredLight",
+    "sources": "https://github.com/BoredBrownBear/BoredLight",
+    "issues": "https://github.com/BoredBrownBear/BoredLight/issues"
   },
 
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/boredlight/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.shawlaf.varlight.fabric.VarLightMod"
+      "boredbrownbear.boredlight.BoredLight"
     ]
   },
 
   "mixins": [
-    "varlight.mixins.json"
+    "boredlight.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.8.8",
     "fabric": "*",
-    "minecraft": "1.16.1"
-  },
-
-  "suggests": {
-    "flamingo": "*"
+    "minecraft": "1.16.5"
   }
+
 }
